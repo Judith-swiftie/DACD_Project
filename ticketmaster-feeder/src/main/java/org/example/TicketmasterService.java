@@ -25,6 +25,14 @@ public class TicketmasterService {
 
             try {
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                if (response.statusCode() == 429) {
+                    System.out.println("⚠️  Demasiadas solicitudes. Esperando 60 segundos antes de reintentar...");
+                    Thread.sleep(60000); // Espera 60 segundos
+                    page--; // Retrocede una página para volver a intentarlo
+                    continue; // Reintenta la solicitud
+                }
+
                 if (response.statusCode() == 200) {
                     JsonNode rootNode = objectMapper.readTree(response.body());
                     JsonNode eventsNode = rootNode.path("_embedded").path("events");

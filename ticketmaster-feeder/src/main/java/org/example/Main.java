@@ -1,41 +1,24 @@
 package org.example;
 
 import java.util.List;
-import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Main {
     public static void main(String[] args) {
         TicketmasterService service = new TicketmasterService();
-        Scanner scanner = new Scanner(System.in);
+        DatabaseManager dbManager = new DatabaseManager();
+        Timer timer = new Timer();
 
-        System.out.println("🎫 Bienvenido a Ticketmaster España 🎫");
-        System.out.println("📡 Buscando eventos de música...");
+        System.out.println("🎫 Iniciando consulta periódica de eventos...");
 
-        List<Event> events = service.fetchMusicEvents();
-
-        if (events.isEmpty()) {
-            System.out.println("❌ No se encontraron conciertos.");
-        } else {
-            System.out.println("✅ Se encontraron " + events.size() + " conciertos:");
-            for (int i = 0; i < events.size(); i++) {
-                System.out.println("[" + (i + 1) + "] " + events.get(i).getName());
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                List<Event> events = service.fetchMusicEvents();
+                dbManager.saveEvents(events);
+                System.out.println("✅ Base de datos actualizada con nuevos eventos.");
             }
-
-            System.out.print("\n🔎 Introduce el número del evento para ver detalles (0 para salir): ");
-            int choice = scanner.nextInt();
-
-            while (choice != 0) {
-                if (choice > 0 && choice <= events.size()) {
-                    events.get(choice - 1).printDetails();
-                } else {
-                    System.out.println("❌ Opción no válida.");
-                }
-                System.out.print("\n🔎 Introduce otro número (0 para salir): ");
-                choice = scanner.nextInt();
-            }
-        }
-
-        System.out.println("👋 ¡Gracias por usar TicketmasterAPI!");
-        scanner.close();
+        }, 0, 86400000); // Consulta cada 24h
     }
 }
