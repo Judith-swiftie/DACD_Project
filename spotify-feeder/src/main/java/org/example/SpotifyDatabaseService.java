@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SpotifyDatabaseService {
-    private static final String DB_URL = "jdbc:sqlite:spotify.db";
+    private static final String DB_URL = "jdbc:sqlite:database.db";
 
     // Crear las tablas en la base de datos si no existen
     public static void createTables() throws SQLException {

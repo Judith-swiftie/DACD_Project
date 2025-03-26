@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.List;
 
 public class DatabaseManager {
-    private static final String DB_URL = "jdbc:sqlite:ticketmaster.db";
+    private static final String DB_URL = "jdbc:sqlite:database.db";
 
     public DatabaseManager() {
         try {
@@ -13,7 +13,7 @@ public class DatabaseManager {
             Class.forName("org.sqlite.JDBC");
 
             // Obtiene la ruta absoluta del archivo de base de datos
-            String dbPath = Paths.get("ticketmaster.db").toAbsolutePath().toString();
+            String dbPath = Paths.get("database.db").toAbsolutePath().toString();
             System.out.println("La base de datos se guarda en: " + dbPath);
 
             // Intenta conectar a la base de datos
