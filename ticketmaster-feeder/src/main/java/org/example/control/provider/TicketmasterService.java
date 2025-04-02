@@ -58,7 +58,7 @@ public class TicketmasterService implements ServiceStore {
         return eventsList;
     }
 
-    private Event parseEvent(JsonNode event) {
+    protected Event parseEvent(JsonNode event) {
         String name = event.path("name").asText();
         String date = event.path("dates").path("start").path("localDate").asText();
         String time = event.path("dates").path("start").path("localTime").asText();
