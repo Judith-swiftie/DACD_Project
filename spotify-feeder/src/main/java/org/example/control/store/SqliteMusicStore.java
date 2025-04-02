@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class SqliteMusicStore implements MusicStore {
     private static final String DB_URL = "jdbc:sqlite:database.db";
@@ -15,12 +14,11 @@ public class SqliteMusicStore implements MusicStore {
                 "id TEXT PRIMARY KEY, " +
                 "name TEXT NOT NULL)";
 
-        // Modificación para que la tabla 'tracks' tenga una clave compuesta (artist_id, track_name)
         String createTracksTable = "CREATE TABLE IF NOT EXISTS tracks (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "artist_id TEXT NOT NULL, " +
                 "track_name TEXT NOT NULL, " +
-                "UNIQUE(artist_id, track_name), " +  // Clave compuesta única
+                "UNIQUE(artist_id, track_name), " +
                 "FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE)";
 
         try (Connection connection = DriverManager.getConnection(DB_URL);
@@ -32,9 +30,8 @@ public class SqliteMusicStore implements MusicStore {
     @Override
     public void saveArtistAndTracks(String artistId, String artistName, List<String> tracks) throws SQLException {
         try (Connection connection = DriverManager.getConnection(DB_URL)) {
-            connection.setAutoCommit(false); // Empezamos una transacción
+            connection.setAutoCommit(false);
 
-            // Primero, aseguramos que el artista está en la tabla 'artists'
             String artistQuery = "SELECT * FROM artists WHERE id = ?";
             try (PreparedStatement artistStatement = connection.prepareStatement(artistQuery)) {
                 artistStatement.setString(1, artistId);
@@ -71,7 +68,6 @@ public class SqliteMusicStore implements MusicStore {
             connection.commit();
         }
     }
-
 
     @Override
     public List<String> getTracksByArtistId(String artistId) throws SQLException {

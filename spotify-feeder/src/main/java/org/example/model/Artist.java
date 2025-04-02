@@ -9,7 +9,6 @@ public class Artist {
         this.name = name;
     }
 
-    // Getters y Setters
     public String getId() {
         return id;
     }
