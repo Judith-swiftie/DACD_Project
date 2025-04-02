@@ -1,64 +1,47 @@
 package org.example;
 
-import org.json.JSONObject;
+import org.example.control.provider.SpotifyArtistService;
+import org.example.control.provider.SpotifyAuth;
+import org.example.control.provider.SpotifyClient;
+import org.example.control.store.SqliteMusicStore;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Main {
-
     public static void main(String[] args) {
         try {
-            // Crear las tablas en la base de datos si no existen
-            SpotifyDatabaseService.createTables();
+            // Crear la instancia de la base de datos y las tablas
+            SqliteMusicStore store = new SqliteMusicStore();
+            store.createTables();
 
-            // Configurar la ejecución periódica cada 1 hora (3600 segundos)
-            Timer timer = new Timer();
-            timer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        // Obtener el token de acceso
-                        String token = SpotifyAuth.getAccessToken();
-                        SpotifyClient client = new SpotifyClient(token);
+            // Obtener el token de acceso para la API de Spotify
+            String token = SpotifyAuth.getAccessToken();
+            SpotifyClient client = new SpotifyClient(token);
+            SpotifyArtistService artistService = new SpotifyArtistService(client);
 
-                        // Crear el servicio de artistas
-                        SpotifyArtistService artistService = new SpotifyArtistService(client);
+            // Definir el nombre del artista y el código del país
+            String artistName = "Lady Gaga";
+            String countryCode = "ES";
 
-                        // Definir el nombre del artista y el código de país
-                        String artistName = "Taylor Swift";
-                        String countryCode = "ES";
+            // Buscar el artista por nombre
+            var artistData = artistService.findArtistByName(artistName);
+            if (artistData != null) {
+                String artistId = artistData.getString("id");
 
-                        // Buscar y generar la playlist del artista
-                        JSONObject artistData = artistService.getArtistData(artistName);
+                // Obtener las canciones más populares del artista para el país indicado
+                List<String> tracks = artistService.getTopTracksByCountry(artistId, countryCode);
 
-                        if (artistData != null) {
-                            // Obtener el ID del artista desde la respuesta JSON
-                            String artistId = artistData.getString("id");  // Cambié "artistId" por "id", que es el campo correcto
+                // Guardar los datos del artista y sus canciones en la base de datos
+                store.saveArtistAndTracks(artistId, artistName, tracks);
 
-                            // Obtener las canciones más populares
-                            List<String> tracks = artistService.getTopTracksByCountry(artistId, countryCode);
-
-                            // Verificar si hay cambios en las canciones y almacenarlas si es necesario
-                            if (SpotifyDatabaseService.hasTracksChanged(artistId, tracks)) {
-                                SpotifyDatabaseService.saveArtistAndTracks(artistId, artistName, tracks);
-                                System.out.println("\n🎶 Se ha actualizado la base de datos con nuevas canciones para el artista: " + artistName);
-                            } else {
-                                System.out.println("\n🔄 No hubo cambios en las canciones del artista: " + artistName);
-                            }
-                        } else {
-                            System.out.println("❌ No se pudo generar la playlist para el artista: " + artistName);
-                        }
-                    } catch (Exception e) {
-                        System.out.println("🚨 Error al ejecutar la actualización periódica: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-            }, 0, 3600000);  // Ejecuta inmediatamente y luego cada 1 hora (3600000 ms)
+                System.out.println("🎶 Playlist actualizada con las canciones de: " + artistName);
+            } else {
+                System.out.println("❌ No se encontró el artista.");
+            }
 
         } catch (Exception e) {
-            System.out.println("🚨 Error al ejecutar la aplicación:");
+            // Capturar errores y mostrar el mensaje de excepción
+            System.err.println("🚨 Error: " + e.getMessage());
             e.printStackTrace();
         }
     }

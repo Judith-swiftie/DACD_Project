@@ -1,4 +1,4 @@
-package org.example;
+package org.example.control.provider;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,19 +13,17 @@ public class SpotifyAuth {
     private static final String TOKEN_URL = "https://accounts.spotify.com/api/token";
 
     public static String getAccessToken() throws Exception {
-        String auth = CLIENT_ID + ":" + CLIENT_SECRET;
-        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+        String credentials = CLIENT_ID + ":" + CLIENT_SECRET;
+        String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(TOKEN_URL))
-                .header("Authorization", "Basic " + encodedAuth)
+                .header("Authorization", "Basic " + encodedCredentials)
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString("grant_type=client_credentials"))
                 .build();
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
         JSONObject jsonResponse = new JSONObject(response.body());
         return jsonResponse.getString("access_token");
     }

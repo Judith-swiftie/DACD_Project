@@ -1,26 +1,24 @@
-package org.example;
+package org.example.control.store;
+
+import org.example.control.provider.Event;
 
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.List;
 
-public class DatabaseManager {
+public class SqliteEventStore {
     private static final String DB_URL = "jdbc:sqlite:database.db";
 
-    public DatabaseManager() {
+    public SqliteEventStore() {
         try {
-            // Registra el controlador SQLite
             Class.forName("org.sqlite.JDBC");
 
-            // Obtiene la ruta absoluta del archivo de base de datos
             String dbPath = Paths.get("database.db").toAbsolutePath().toString();
             System.out.println("La base de datos se guarda en: " + dbPath);
 
-            // Intenta conectar a la base de datos
             Connection connection = DriverManager.getConnection(DB_URL);
             System.out.println("Conexión exitosa a la base de datos SQLite");
 
-            // Crear la tabla si no existe
             createTable();
 
         } catch (ClassNotFoundException | SQLException e) {
@@ -53,7 +51,6 @@ public class DatabaseManager {
 
     public void saveEvents(List<Event> events) {
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            // Asegúrate de que la tabla 'events' esté presente antes de insertar los eventos
             createTable();
 
             for (Event event : events) {

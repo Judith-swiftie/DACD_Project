@@ -1,4 +1,4 @@
-package org.example;
+package org.example.control.provider;
 
 public class Event {
     private String name;

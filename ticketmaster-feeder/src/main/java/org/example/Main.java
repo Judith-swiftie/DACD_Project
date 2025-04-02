@@ -1,5 +1,9 @@
 package org.example;
 
+import org.example.control.provider.Event;
+import org.example.control.provider.TicketmasterService;
+import org.example.control.store.SqliteEventStore;
+
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -7,7 +11,7 @@ import java.util.TimerTask;
 public class Main {
     public static void main(String[] args) {
         TicketmasterService service = new TicketmasterService();
-        DatabaseManager dbManager = new DatabaseManager();
+        SqliteEventStore dbManager = new SqliteEventStore();
         Timer timer = new Timer();
 
         System.out.println("🎫 Iniciando consulta periódica de eventos...");
@@ -19,6 +23,6 @@ public class Main {
                 dbManager.saveEvents(events);
                 System.out.println("✅ Base de datos actualizada con nuevos eventos.");
             }
-        }, 0, 86400000); // Consulta cada 24h
+        }, 0, 86400000);
     }
 }

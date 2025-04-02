@@ -1,4 +1,4 @@
-package org.example;
+package org.example.control.provider;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -6,6 +6,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +29,9 @@ public class TicketmasterService {
 
                 if (response.statusCode() == 429) {
                     System.out.println("⚠️  Demasiadas solicitudes. Esperando 60 segundos antes de reintentar...");
-                    Thread.sleep(60000); // Espera 60 segundos
-                    page--; // Retrocede una página para volver a intentarlo
-                    continue; // Reintenta la solicitud
+                    Thread.sleep(60000);
+                    page--;
+                    continue;
                 }
 
                 if (response.statusCode() == 200) {
