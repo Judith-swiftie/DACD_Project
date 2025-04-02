@@ -2,7 +2,7 @@ package org.example.model;
 
 import java.util.List;
 
-public class EventModel {
+public class Event {
     private String name;
     private String date;
     private String time;
@@ -12,7 +12,7 @@ public class EventModel {
     private List<Artist> artists;
     private String priceInfo;
 
-    public EventModel(String name, String date, String time, String venue, String city, String country, List<Artist> artists, String priceInfo) {
+    public Event(String name, String date, String time, String venue, String city, String country, List<Artist> artists, String priceInfo) {
         this.name = name;
         this.date = date;
         this.time = time;

@@ -10,13 +10,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TicketmasterService {
+public class TicketmasterService implements ServiceStore {
     private static final String API_KEY = System.getenv("API_KEY");
     private static final String BASE_URL = "https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + API_KEY + "&countryCode=ES";
     private static final int TOTAL_PAGES = 20;
     private final HttpClient client = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Override
     public List<Event> fetchMusicEvents() {
         List<Event> eventsList = new ArrayList<>();
 

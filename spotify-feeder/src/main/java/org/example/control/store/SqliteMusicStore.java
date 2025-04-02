@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public class SqliteMusicStore implements MusicStore {
-    private static final String DB_URL = "jdbc:sqlite:database.db";
+    private static final String DB_URL = System.getenv("DB_URL");
 
     @Override
     public void createTables() throws SQLException {

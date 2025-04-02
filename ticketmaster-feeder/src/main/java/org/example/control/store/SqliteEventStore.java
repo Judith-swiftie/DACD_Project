@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SqliteEventStore implements EventStore {
-    private static final String DB_URL = "jdbc:sqlite:database.db";
+    private static final String DB_URL = System.getenv("DB_URL");
 
     public SqliteEventStore() {
         try {
