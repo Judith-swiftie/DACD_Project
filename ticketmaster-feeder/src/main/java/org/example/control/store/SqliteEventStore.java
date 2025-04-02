@@ -4,9 +4,10 @@ import org.example.control.provider.Event;
 
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
-public class SqliteEventStore {
+public class SqliteEventStore implements EventStore {
     private static final String DB_URL = "jdbc:sqlite:database.db";
 
     public SqliteEventStore() {
@@ -49,6 +50,7 @@ public class SqliteEventStore {
         }
     }
 
+    @Override
     public void saveEvents(List<Event> events) {
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
             createTable();
@@ -62,6 +64,104 @@ public class SqliteEventStore {
             }
         } catch (SQLException e) {
             System.err.println("Error al guardar los eventos: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<Event> getAllEvents() {
+        List<Event> events = new ArrayList<>();
+        String sql = "SELECT * FROM events";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Event event = new Event(
+                        rs.getString("name"),
+                        rs.getString("date"),
+                        rs.getString("time"),
+                        rs.getString("venue"),
+                        rs.getString("city"),
+                        rs.getString("country"),
+                        rs.getString("artists"),
+                        rs.getString("priceInfo")
+                );
+                events.add(event);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener los eventos: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return events;
+    }
+
+    @Override
+    public Event findEventByName(String name) {
+        String sql = "SELECT * FROM events WHERE name = ?";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return new Event(
+                        rs.getString("name"),
+                        rs.getString("date"),
+                        rs.getString("time"),
+                        rs.getString("venue"),
+                        rs.getString("city"),
+                        rs.getString("country"),
+                        rs.getString("artists"),
+                        rs.getString("priceInfo")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar el evento: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public void deleteEventByName(String name) {
+        String sql = "DELETE FROM events WHERE name = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            int rowsAffected = pstmt.executeUpdate();
+            System.out.println("Eventos eliminados: " + rowsAffected);
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar el evento: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void updateEvent(Event event) {
+        String sql = "UPDATE events SET date = ?, time = ?, venue = ?, city = ?, country = ?, artists = ?, priceInfo = ? WHERE name = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, event.getDate());
+            pstmt.setString(2, event.getTime());
+            pstmt.setString(3, event.getVenue());
+            pstmt.setString(4, event.getCity());
+            pstmt.setString(5, event.getCountry());
+            pstmt.setString(6, event.getArtists());
+            pstmt.setString(7, event.getPriceInfo());
+            pstmt.setString(8, event.getName());
+            int rowsAffected = pstmt.executeUpdate();
+            System.out.println("Eventos actualizados: " + rowsAffected);
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar el evento: " + e.getMessage());
             e.printStackTrace();
         }
     }
