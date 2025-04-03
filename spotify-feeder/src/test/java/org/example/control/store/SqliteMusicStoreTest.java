@@ -19,8 +19,8 @@ public class SqliteMusicStoreTest {
 
     @Test
     public void testSaveArtistAndTracks() throws SQLException {
-        store.saveArtistAndTracks("123", "Lady Gaga", List.of("Shallow", "Bad Romance"));
-        List<String> tracks = store.getTracksByArtistId("123");
+        store.saveArtistAndTracks("12345", "Lady Gaga", List.of("Shallow", "Bad Romance"));
+        List<String> tracks = store.getTracksByArtistId("12345");
         assertEquals(2, tracks.size());
         assertTrue(tracks.contains("Shallow"));
         assertTrue(tracks.contains("Bad Romance"));
@@ -28,8 +28,8 @@ public class SqliteMusicStoreTest {
 
     @Test
     public void testHasTracksChanged() throws SQLException {
-        store.saveArtistAndTracks("123", "Lady Gaga", List.of("Shallow"));
-        boolean changed = store.hasTracksChanged("123", List.of("Shallow", "Bad Romance"));
+        store.saveArtistAndTracks("12345", "Lady Gaga", List.of("Shallow"));
+        boolean changed = store.hasTracksChanged("12345", List.of("Shallow", "Abracadabra"));
         assertTrue(changed);
     }
 }

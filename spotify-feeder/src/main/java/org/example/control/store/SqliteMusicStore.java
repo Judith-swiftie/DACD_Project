@@ -81,6 +81,7 @@ public class SqliteMusicStore implements MusicStore {
             while (resultSet.next()) {
                 tracks.add(resultSet.getString("track_name"));
             }
+
             return tracks;
         }
     }

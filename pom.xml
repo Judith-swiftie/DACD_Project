@@ -29,10 +29,9 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.3.0</version> <!-- O la versión que estés utilizando -->
+            <version>5.3.0</version>
             <scope>test</scope>
         </dependency>
-
 
     </dependencies>
 
