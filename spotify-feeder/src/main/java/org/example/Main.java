@@ -10,6 +10,8 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         try {
+            SpotifyFeeder feeder = new SpotifyFeeder();
+            feeder.fetchAndSendSpotifyEvents();
             SqliteMusicStore store = new SqliteMusicStore();
             store.createTables();
 
