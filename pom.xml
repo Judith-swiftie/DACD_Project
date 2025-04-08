@@ -12,6 +12,7 @@
         <module>ticketmaster-feeder</module>
         <module>spotify-feeder</module>
         <module>event-store-builder</module>
+        <module>common</module>
     </modules>
 
     <properties>
