@@ -13,10 +13,10 @@ import java.util.List;
 public class SpotifyFeeder {
 
     private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String TOPIC_NAME = "prediction.SpotifyEvents";
+    private static final String TOPIC_NAME = "playlist.SpotifyEvents";
     private static final String DB_URL = System.getenv("DB_URL");
 
-    public void sendStoredSpotifyEvents() {
+    public void sendSpotifyEvents() {
         MusicStore store = new SqliteMusicStore();
 
         try (Connection sqlConnection = DriverManager.getConnection(DB_URL);
@@ -31,16 +31,8 @@ public class SpotifyFeeder {
                 if (tracks.isEmpty()) continue;
 
                 String description = "Tracks: " + String.join(", ", tracks);
-
-                Event event = new Event(
-                        System.currentTimeMillis(),
-                        "Spotify",
-                        artistName,
-                        "España",
-                        description
-                );
-
-                sendEventToBroker(event);
+                // Enviar evento con los detalles del artista y tracks
+                sendSpotifyEventToBroker(artistName, description);
             }
 
         } catch (SQLException e) {
@@ -48,7 +40,7 @@ public class SpotifyFeeder {
         }
     }
 
-    private void sendEventToBroker(Event event) {
+    private void sendSpotifyEventToBroker(String artistName, String description) {
         javax.jms.Connection jmsConnection = null;
         Session session = null;
         MessageProducer producer = null;
@@ -62,12 +54,18 @@ public class SpotifyFeeder {
             Topic topic = session.createTopic(TOPIC_NAME);
             producer = session.createProducer(topic);
 
+            // Crear evento con más detalles
+            long timestamp = System.currentTimeMillis();  // Usamos el timestamp actual
+            String sourceSystem = "Spotify";  // Fuente de los eventos
+            Event event = new Event(timestamp, sourceSystem, artistName, description);
+
+            // Convertir a JSON
             Gson gson = new Gson();
             String jsonMessage = gson.toJson(event);
             TextMessage message = session.createTextMessage(jsonMessage);
 
             producer.send(message);
-            System.out.println("✅ Evento enviado: " + jsonMessage);
+            System.out.println("✅ Evento enviado a Spotify: " + jsonMessage);
 
         } catch (JMSException e) {
             System.err.println("❌ Error enviando al broker: " + e.getMessage());
@@ -79,6 +77,37 @@ public class SpotifyFeeder {
             } catch (JMSException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    // Evento completo para enviar
+    class Event {
+        private long ts;  // Timestamp
+        private String ss;  // Source System
+        private String artistName;
+        private String description;
+
+        public Event(long ts, String ss, String artistName, String description) {
+            this.ts = ts;
+            this.ss = ss;
+            this.artistName = artistName;
+            this.description = description;
+        }
+
+        public long getTs() {
+            return ts;
+        }
+
+        public String getSs() {
+            return ss;
+        }
+
+        public String getArtistName() {
+            return artistName;
+        }
+
+        public String getDescription() {
+            return description;
         }
     }
 }

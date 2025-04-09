@@ -8,11 +8,16 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import com.google.gson.Gson;
+import java.util.UUID;
 
 public class EventStoreBuilder {
 
     private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String TOPIC_NAME = "prediction.SpotifyEvents";
+    private final String topicName;
+
+    public EventStoreBuilder(String topicName) {
+        this.topicName = topicName;
+    }
 
     public void startEventStore() {
         Connection connection = null;
@@ -22,38 +27,37 @@ public class EventStoreBuilder {
         ConnectionFactory factory = new ActiveMQConnectionFactory(BROKER_URL);
 
         try {
+            String clientID = "EventStoreClient-" + topicName + "-" + UUID.randomUUID().toString();
             connection = factory.createConnection();
-            connection.setClientID("EventStoreClient");
+            connection.setClientID(clientID);
             connection.start();
 
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Topic topic = session.createTopic(TOPIC_NAME);
-            consumer = session.createDurableSubscriber(topic, "EventStoreSubscription");
+            Topic topic = session.createTopic(topicName);
+            consumer = session.createDurableSubscriber(topic, "EventStoreSubscription-" + topicName);
 
             while (true) {
                 Message message = consumer.receive();
 
-                if (message instanceof TextMessage) {
-                    String jsonMessage = ((TextMessage) message).getText();
-                    Gson gson = new Gson();
-                    Event event = gson.fromJson(jsonMessage, Event.class);
-
-                    saveEvent(event);
+                if (message == null) {
+                    System.out.println("No message received");
+                } else {
+                    if (message instanceof TextMessage) {
+                        String jsonMessage = ((TextMessage) message).getText();
+                        System.out.println("Mensaje JSON recibido: " + jsonMessage);
+                        Gson gson = new Gson();
+                        Event event = gson.fromJson(jsonMessage, Event.class);
+                        saveEvent(event);
+                    }
                 }
             }
         } catch (JMSException e) {
             e.printStackTrace();
         } finally {
             try {
-                if (consumer != null) {
-                    consumer.close();
-                }
-                if (session != null) {
-                    session.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
+                if (consumer != null) consumer.close();
+                if (session != null) session.close();
+                if (connection != null) connection.close();
             } catch (JMSException e) {
                 e.printStackTrace();
             }
@@ -61,12 +65,20 @@ public class EventStoreBuilder {
     }
 
     private void saveEvent(Event event) {
-        String topic = "prediction.SpotifyEvents";
+        if (event.getTs() <= 0) {
+            System.out.println("Timestamp inválido para el evento: " + event);
+            return;
+        }
+
         String dateString = new SimpleDateFormat("yyyyMMdd").format(new Date(event.getTs()));
 
-        File directory = new File("eventstore/" + topic + "/" + event.getSs() + "/" + dateString);
+        File directory = new File("eventstore/" + topicName + "/" + event.getSs() + "/" + dateString);
         if (!directory.exists()) {
-            directory.mkdirs();
+            if (directory.mkdirs()) {
+                System.out.println("Directorios creados: " + directory.getPath());
+            } else {
+                System.out.println("No se pudieron crear los directorios: " + directory.getPath());
+            }
         }
 
         File eventFile = new File(directory, dateString + ".events");
@@ -74,14 +86,9 @@ public class EventStoreBuilder {
             Gson gson = new Gson();
             String jsonMessage = gson.toJson(event);
             writer.write(jsonMessage + "\n");
-            System.out.println("Evento almacenado: " + jsonMessage);
+            System.out.println("Evento almacenado en " + topicName + ": " + jsonMessage);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        EventStoreBuilder eventStoreBuilder = new EventStoreBuilder();
-        eventStoreBuilder.startEventStore();
     }
 }

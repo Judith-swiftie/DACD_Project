@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             SpotifyFeeder feeder = new SpotifyFeeder();
-            feeder.sendStoredSpotifyEvents();
+            feeder.sendSpotifyEvents();
             SqliteMusicStore store = new SqliteMusicStore();
             store.createTables();
 
