@@ -36,15 +36,18 @@ public class EventStoreBuilder {
             Topic topic = session.createTopic(topicName);
             consumer = session.createDurableSubscriber(topic, "EventStoreSubscription-" + topicName);
 
+            System.out.println("Esperando mensajes en el topic: " + topicName);
+
             while (true) {
-                Message message = consumer.receive();
+                Message message = consumer.receive(10000);  // Esperar hasta 10 segundos para un mensaje
 
                 if (message == null) {
-                    System.out.println("No message received");
+                    System.out.println("No se recibió ningún mensaje en este ciclo.");
                 } else {
                     if (message instanceof TextMessage) {
                         String jsonMessage = ((TextMessage) message).getText();
                         System.out.println("Mensaje JSON recibido: " + jsonMessage);
+
                         Gson gson = new Gson();
                         Event event = gson.fromJson(jsonMessage, Event.class);
                         saveEvent(event);
@@ -74,7 +77,8 @@ public class EventStoreBuilder {
 
         File directory = new File("eventstore/" + topicName + "/" + event.getSs() + "/" + dateString);
         if (!directory.exists()) {
-            if (directory.mkdirs()) {
+            boolean dirsCreated = directory.mkdirs();
+            if (dirsCreated) {
                 System.out.println("Directorios creados: " + directory.getPath());
             } else {
                 System.out.println("No se pudieron crear los directorios: " + directory.getPath());

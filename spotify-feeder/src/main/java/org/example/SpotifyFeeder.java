@@ -31,7 +31,6 @@ public class SpotifyFeeder {
                 if (tracks.isEmpty()) continue;
 
                 String description = "Tracks: " + String.join(", ", tracks);
-                // Enviar evento con los detalles del artista y tracks
                 sendSpotifyEventToBroker(artistName, description);
             }
 
@@ -54,12 +53,10 @@ public class SpotifyFeeder {
             Topic topic = session.createTopic(TOPIC_NAME);
             producer = session.createProducer(topic);
 
-            // Crear evento con más detalles
-            long timestamp = System.currentTimeMillis();  // Usamos el timestamp actual
-            String sourceSystem = "Spotify";  // Fuente de los eventos
+            long timestamp = System.currentTimeMillis();
+            String sourceSystem = "Spotify";
             Event event = new Event(timestamp, sourceSystem, artistName, description);
 
-            // Convertir a JSON
             Gson gson = new Gson();
             String jsonMessage = gson.toJson(event);
             TextMessage message = session.createTextMessage(jsonMessage);
@@ -80,10 +77,9 @@ public class SpotifyFeeder {
         }
     }
 
-    // Evento completo para enviar
     class Event {
-        private long ts;  // Timestamp
-        private String ss;  // Source System
+        private long ts;
+        private String ss;
         private String artistName;
         private String description;
 

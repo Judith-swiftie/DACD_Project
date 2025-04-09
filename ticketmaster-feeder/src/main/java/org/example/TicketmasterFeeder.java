@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.example.control.store.EventStore;
 import org.example.control.store.SqliteEventStore;
-import org.example.control.provider.Event;  // Asegúrate de importar la clase Event correctamente
 
 import javax.jms.*;
 import java.util.List;
@@ -15,17 +14,15 @@ public class TicketmasterFeeder {
     private static final String BROKER_URL = "tcp://localhost:61616";
     private static final String TOPIC_NAME = "concert.TicketmasterEvents";
 
-    // Método para enviar los eventos almacenados de Ticketmaster
     public void sendStoredTicketmasterEvents() {
         EventStore store = new SqliteEventStore();
-        List<org.example.control.provider.Event> events = store.getAllEvents();  // Obtienes la lista de eventos
+        List<org.example.control.provider.Event> events = store.getAllEvents();
 
         if (events.isEmpty()) {
             System.out.println("No hay eventos guardados para enviar.");
             return;
         }
 
-        // Convertir los eventos de org.example.control.provider.Event a TicketmasterFeeder.Event
         List<TicketmasterFeeder.Event> mappedEvents = mapEvents(events);
 
         for (TicketmasterFeeder.Event event : mappedEvents) {
@@ -33,21 +30,19 @@ public class TicketmasterFeeder {
         }
     }
 
-    // Método para convertir eventos
     private List<TicketmasterFeeder.Event> mapEvents(List<org.example.control.provider.Event> events) {
         List<TicketmasterFeeder.Event> mappedEvents = new ArrayList<>();
 
         for (org.example.control.provider.Event event : events) {
-            // Convierte cada evento a TicketmasterFeeder.Event
             TicketmasterFeeder.Event mappedEvent = new TicketmasterFeeder.Event(
-                    event.getName(), // Usamos el nombre del evento de la clase Event
-                    event.getDate(), // Usamos la fecha del evento
-                    event.getTime(), // Usamos la hora del evento
-                    event.getVenue(), // Usamos el lugar del evento
-                    event.getCity(), // Usamos la ciudad del evento
-                    event.getCountry(), // Usamos el país del evento
-                    event.getArtists(), // Usamos los artistas del evento
-                    event.getPriceInfo() // Usamos la información del precio
+                    event.getName(),
+                    event.getDate(),
+                    event.getTime(),
+                    event.getVenue(),
+                    event.getCity(),
+                    event.getCountry(),
+                    event.getArtists(),
+                    event.getPriceInfo()
             );
             mappedEvents.add(mappedEvent);
         }
@@ -71,7 +66,6 @@ public class TicketmasterFeeder {
             Topic topic = session.createTopic(TOPIC_NAME);
             producer = session.createProducer(topic);
 
-            // Convertir el evento a JSON
             Gson gson = new Gson();
             String jsonMessage = gson.toJson(event);
             TextMessage message = session.createTextMessage(jsonMessage);
@@ -91,7 +85,6 @@ public class TicketmasterFeeder {
         }
     }
 
-    // Clase interna Event para TicketmasterFeeder
     public static class Event {
         private String name;
         private String date;
@@ -113,7 +106,6 @@ public class TicketmasterFeeder {
             this.priceInfo = priceInfo;
         }
 
-        // Getters
         public String getName() {
             return name;
         }
