@@ -12,7 +12,7 @@ import com.google.gson.Gson;
 public class EventStoreBuilder {
 
     private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String TOPIC_NAME = "prediction.SpotifyEvents"; // Cambia esto según el topic que estás suscribiendo
+    private static final String TOPIC_NAME = "prediction.SpotifyEvents";
 
     public void startEventStore() {
         Connection connection = null;
@@ -23,23 +23,21 @@ public class EventStoreBuilder {
 
         try {
             connection = factory.createConnection();
-            connection.setClientID("EventStoreClient");  // Para que la suscripción sea duradera
+            connection.setClientID("EventStoreClient");
             connection.start();
 
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Topic topic = session.createTopic(TOPIC_NAME);
             consumer = session.createDurableSubscriber(topic, "EventStoreSubscription");
 
-            // Consumir los mensajes
             while (true) {
-                Message message = consumer.receive();  // Bloquea hasta que se recibe un mensaje
+                Message message = consumer.receive();
 
                 if (message instanceof TextMessage) {
                     String jsonMessage = ((TextMessage) message).getText();
                     Gson gson = new Gson();
                     Event event = gson.fromJson(jsonMessage, Event.class);
 
-                    // Organizar y almacenar el evento
                     saveEvent(event);
                 }
             }
@@ -63,8 +61,7 @@ public class EventStoreBuilder {
     }
 
     private void saveEvent(Event event) {
-        // Crear la estructura de directorios
-        String topic = "prediction.SpotifyEvents"; // Usa el mismo tópico del mensaje
+        String topic = "prediction.SpotifyEvents";
         String dateString = new SimpleDateFormat("yyyyMMdd").format(new Date(event.getTs()));
 
         File directory = new File("eventstore/" + topic + "/" + event.getSs() + "/" + dateString);
@@ -72,7 +69,6 @@ public class EventStoreBuilder {
             directory.mkdirs();
         }
 
-        // Guardar el evento en el archivo correspondiente
         File eventFile = new File(directory, dateString + ".events");
         try (FileWriter writer = new FileWriter(eventFile, true)) {
             Gson gson = new Gson();
@@ -86,6 +82,6 @@ public class EventStoreBuilder {
 
     public static void main(String[] args) {
         EventStoreBuilder eventStoreBuilder = new EventStoreBuilder();
-        eventStoreBuilder.startEventStore();  // Inicia la escucha y almacenamiento de eventos
+        eventStoreBuilder.startEventStore();
     }
 }
