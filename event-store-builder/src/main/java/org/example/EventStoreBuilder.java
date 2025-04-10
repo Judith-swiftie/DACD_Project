@@ -78,17 +78,13 @@ public class EventStoreBuilder {
             return;
         }
 
-        // Procesar el nombre del artista para Ticketmaster o Spotify
         String eventName;
         if ("Ticketmaster".equals(event.getSs())) {
-            // Para Ticketmaster usamos el campo "name"
             eventName = event.getName();
         } else {
-            // Para Spotify usamos el campo "artistName"
             eventName = event.getArtistName();
         }
 
-        // Si el nombre del evento/artista está vacío o nulo, mostramos un mensaje
         if (eventName == null || eventName.isEmpty()) {
             System.out.println("Nombre del artista/evento vacío o nulo: " + event);
             return;
@@ -103,7 +99,6 @@ public class EventStoreBuilder {
 
         String dateString = new SimpleDateFormat("yyyyMMdd").format(new Date(event.getTs()));
 
-        // Verificamos si el directorio existe, de lo contrario lo creamos
         File directory = new File("eventstore/" + event.getSs() + "/" + event.getSs() + "/" + dateString);
         if (!directory.exists()) {
             boolean dirsCreated = directory.mkdirs();
