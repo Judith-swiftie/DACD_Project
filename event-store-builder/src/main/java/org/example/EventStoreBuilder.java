@@ -67,15 +67,44 @@ public class EventStoreBuilder {
         }
     }
 
-    private void saveEvent(Event event) {
+    public void saveEvent(Event event) {
+        if (event == null) {
+            System.out.println("Evento inválido, no se puede almacenar.");
+            return;
+        }
+
         if (event.getTs() <= 0) {
             System.out.println("Timestamp inválido para el evento: " + event);
             return;
         }
 
+        // Procesar el nombre del artista para Ticketmaster o Spotify
+        String eventName;
+        if ("Ticketmaster".equals(event.getSs())) {
+            // Para Ticketmaster usamos el campo "name"
+            eventName = event.getName();
+        } else {
+            // Para Spotify usamos el campo "artistName"
+            eventName = event.getArtistName();
+        }
+
+        // Si el nombre del evento/artista está vacío o nulo, mostramos un mensaje
+        if (eventName == null || eventName.isEmpty()) {
+            System.out.println("Nombre del artista/evento vacío o nulo: " + event);
+            return;
+        }
+
+        System.out.println("Nombre del evento/artista: " + eventName);
+
+        if (event.getDescription() == null || event.getDescription().isEmpty()) {
+            System.out.println("Descripción vacía o nula para el evento: " + event);
+            return;
+        }
+
         String dateString = new SimpleDateFormat("yyyyMMdd").format(new Date(event.getTs()));
 
-        File directory = new File("eventstore/" + topicName + "/" + event.getSs() + "/" + dateString);
+        // Verificamos si el directorio existe, de lo contrario lo creamos
+        File directory = new File("eventstore/" + event.getSs() + "/" + event.getSs() + "/" + dateString);
         if (!directory.exists()) {
             boolean dirsCreated = directory.mkdirs();
             if (dirsCreated) {
@@ -90,9 +119,13 @@ public class EventStoreBuilder {
             Gson gson = new Gson();
             String jsonMessage = gson.toJson(event);
             writer.write(jsonMessage + "\n");
-            System.out.println("Evento almacenado en " + topicName + ": " + jsonMessage);
+            System.out.println("Evento almacenado en " + event.getSs() + ": " + jsonMessage);
         } catch (IOException e) {
+            System.err.println("Error al escribir el evento en el archivo: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
+
+
 }

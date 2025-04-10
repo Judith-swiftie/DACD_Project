@@ -2,56 +2,45 @@ package org.example;
 
 import com.google.gson.Gson;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.example.control.store.EventStore;
-import org.example.control.store.SqliteEventStore;
 
 import javax.jms.*;
-import java.util.List;
-import java.util.ArrayList;
+import java.sql.*;
+import java.sql.Connection;
 
 public class TicketmasterFeeder {
 
     private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String TOPIC_NAME = "concert.TicketmasterEvents";
+    private static final String TOPIC_NAME = "playlist.TicketmasterEvents";
+    private static final String DB_URL = System.getenv("DB_URL");
 
-    public void sendStoredTicketmasterEvents() {
-        EventStore store = new SqliteEventStore();
-        List<org.example.control.provider.Event> events = store.getAllEvents();
+    public void sendTicketmasterEvents() {
+        try (Connection sqlConnection = DriverManager.getConnection(DB_URL);
+             Statement stmt = sqlConnection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT name, date, time, venue, city, country, artists, priceInfo FROM events")) {
 
-        if (events.isEmpty()) {
-            System.out.println("No hay eventos guardados para enviar.");
-            return;
-        }
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String date = rs.getString("date");
+                String time = rs.getString("time");
+                String venue = rs.getString("venue");
+                String city = rs.getString("city");
+                String country = rs.getString("country");
+                String artists = rs.getString("artists");
+                String priceInfo = rs.getString("priceInfo");
 
-        List<TicketmasterFeeder.Event> mappedEvents = mapEvents(events);
+                // Aquí se crea la descripción del evento
+                String description = String.format("Artistas: %s | Lugar: %s, %s (%s) | Precio: %s", artists, venue, city, country, priceInfo);
 
-        for (TicketmasterFeeder.Event event : mappedEvents) {
-            sendEventToBroker(event);
+                // Llamar a la función para enviar el evento al broker, pasando los valores correctos
+                sendTicketmasterEventToBroker(name, description);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("❌ Error consultando la base de datos: " + e.getMessage());
         }
     }
 
-    private List<TicketmasterFeeder.Event> mapEvents(List<org.example.control.provider.Event> events) {
-        List<TicketmasterFeeder.Event> mappedEvents = new ArrayList<>();
-
-        for (org.example.control.provider.Event event : events) {
-            TicketmasterFeeder.Event mappedEvent = new TicketmasterFeeder.Event(
-                    event.getName(),
-                    event.getDate(),
-                    event.getTime(),
-                    event.getVenue(),
-                    event.getCity(),
-                    event.getCountry(),
-                    event.getArtists(),
-                    event.getPriceInfo()
-            );
-            mappedEvents.add(mappedEvent);
-        }
-
-        return mappedEvents;
-    }
-
-    // Método para enviar un evento al broker
-    private void sendEventToBroker(TicketmasterFeeder.Event event) {
+    private void sendTicketmasterEventToBroker(String name, String description) {
         javax.jms.Connection jmsConnection = null;
         Session session = null;
         MessageProducer producer = null;
@@ -61,10 +50,15 @@ public class TicketmasterFeeder {
         try {
             jmsConnection = factory.createConnection();
             jmsConnection.start();
-
             session = jmsConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Topic topic = session.createTopic(TOPIC_NAME);
             producer = session.createProducer(topic);
+
+            long timestamp = System.currentTimeMillis();
+            String sourceSystem = "Ticketmaster";
+
+            // Ahora se pasan todos los parámetros correctos al constructor de Event
+            Event event = new Event(timestamp, sourceSystem, name, description);
 
             Gson gson = new Gson();
             String jsonMessage = gson.toJson(event);
@@ -72,8 +66,9 @@ public class TicketmasterFeeder {
 
             producer.send(message);
             System.out.println("✅ Evento enviado a Ticketmaster: " + jsonMessage);
+
         } catch (JMSException e) {
-            System.err.println("❌ Error al enviar el evento al broker: " + e.getMessage());
+            System.err.println("❌ Error enviando al broker: " + e.getMessage());
         } finally {
             try {
                 if (producer != null) producer.close();
@@ -85,57 +80,34 @@ public class TicketmasterFeeder {
         }
     }
 
-    public static class Event {
+    // Clase interna para representar los eventos
+    class Event {
+        private long ts;
+        private String ss;
         private String name;
-        private String date;
-        private String time;
-        private String venue;
-        private String city;
-        private String country;
-        private String artists;
-        private String priceInfo;
+        private String description;
 
-        public Event(String name, String date, String time, String venue, String city, String country, String artists, String priceInfo) {
+        public Event(long ts, String ss, String name, String description) {
+            this.ts = ts;
+            this.ss = ss;
             this.name = name;
-            this.date = date;
-            this.time = time;
-            this.venue = venue;
-            this.city = city;
-            this.country = country;
-            this.artists = artists;
-            this.priceInfo = priceInfo;
+            this.description = description;
+        }
+
+        public long getTs() {
+            return ts;
+        }
+
+        public String getSs() {
+            return ss;
         }
 
         public String getName() {
             return name;
         }
 
-        public String getDate() {
-            return date;
-        }
-
-        public String getTime() {
-            return time;
-        }
-
-        public String getVenue() {
-            return venue;
-        }
-
-        public String getCity() {
-            return city;
-        }
-
-        public String getCountry() {
-            return country;
-        }
-
-        public String getArtists() {
-            return artists;
-        }
-
-        public String getPriceInfo() {
-            return priceInfo;
+        public String getDescription() {
+            return description;
         }
     }
 }

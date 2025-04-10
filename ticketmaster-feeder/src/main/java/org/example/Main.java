@@ -11,7 +11,7 @@ import java.util.TimerTask;
 public class Main {
     public static void main(String[] args) {
         TicketmasterFeeder feeder = new TicketmasterFeeder();
-        feeder.sendStoredTicketmasterEvents();
+        feeder.sendTicketmasterEvents();
         TicketmasterService service = new TicketmasterService();
         SqliteEventStore dbManager = new SqliteEventStore();
         Timer timer = new Timer();
