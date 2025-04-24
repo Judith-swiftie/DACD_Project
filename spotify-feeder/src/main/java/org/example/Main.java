@@ -1,25 +1,27 @@
 package org.example;
 
+import jakarta.jms.JMSException;
 import org.example.control.provider.SpotifyArtistService;
 import org.example.control.provider.SpotifyAuth;
 import org.example.control.provider.SpotifyClient;
 import org.example.control.store.SqliteMusicStore;
 
 import java.util.List;
-
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws JMSException {
         try {
             SpotifyFeeder feeder = new SpotifyFeeder();
             feeder.sendSpotifyEvents();
-            SqliteMusicStore store = new SqliteMusicStore();
+
+            SqliteMusicStore store = new SqliteMusicStore(System.getenv("DB_URL"));
             store.createTables();
 
             String token = SpotifyAuth.getAccessToken();
+
             SpotifyClient client = new SpotifyClient(token);
             SpotifyArtistService artistService = new SpotifyArtistService(client);
 
-            String artistName = "Lady Gaga";
+            String artistName = "Dua Lipa";
             String countryCode = "ES";
 
             var artistData = artistService.findArtistByName(artistName);

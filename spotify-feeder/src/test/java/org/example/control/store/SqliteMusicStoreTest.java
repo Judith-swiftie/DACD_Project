@@ -13,7 +13,7 @@ public class SqliteMusicStoreTest {
 
     @BeforeEach
     public void setUp() throws SQLException {
-        store = new SqliteMusicStore();
+        store = new SqliteMusicStore(System.getProperty("DB_URL"));
         store.createTables();
     }
 

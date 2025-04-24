@@ -1,56 +1,32 @@
 package org.example;
 
+import java.time.Instant;
+import java.util.Map;
+
 public class Event {
-    private long ts;
-    private String ss;
+    private long timestamp;
+    private String source;
+    private Map<String, Object> data;
 
-    private String artistName;
-    private String description;
-
-    private String name;
-    private String date;
-    private String time;
-    private String venue;
-    private String city;
-    private String country;
-    private String artists;
-    private String priceInfo;
-
-    public Event() {}
-
-    public Event(long ts, String ss, String name, String description) {
-        this.ts = ts;
-        this.ss = ss;
-        this.name = name;
-        this.description = description;
+    public Event(long timestamp, String source, Map<String, Object> data) {
+        this.timestamp = timestamp;
+        this.source = source;
+        this.data = data;
     }
 
-    public long getTs() { return ts; }
+    public long getTimestamp() {
+        return timestamp;
+    }
 
-    public String getSs() { return ss; }
+    public String getSource() {
+        return source;
+    }
 
-    public String getArtistName() { return artistName; }
+    public Map<String, Object> getData() {
+        return data;
+    }
 
-    public String getDescription() { return description; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    @Override
-    public String toString() {
-        return "Event{" +
-                "ts=" + ts +
-                ", ss='" + ss + '\'' +
-                ", artistName='" + artistName + '\'' +
-                ", description='" + description + '\'' +
-                ", name='" + name + '\'' +
-                ", date='" + date + '\'' +
-                ", time='" + time + '\'' +
-                ", venue='" + venue + '\'' +
-                ", city='" + city + '\'' +
-                ", country='" + country + '\'' +
-                ", artists='" + artists + '\'' +
-                ", priceInfo='" + priceInfo + '\'' +
-                '}';
+    public Instant getTs() {
+        return Instant.ofEpochMilli(timestamp);
     }
 }
