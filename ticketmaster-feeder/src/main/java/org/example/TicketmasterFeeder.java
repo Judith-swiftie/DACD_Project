@@ -6,11 +6,13 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import javax.jms.*;
 import java.sql.*;
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TicketmasterFeeder {
 
     private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String TOPIC_NAME = "playlist.TicketmasterEvents";
+    private static final String TOPIC_NAME = "events";
     private static final String DB_URL = System.getenv("DB_URL");
 
     public void sendTicketmasterEvents() {
@@ -28,10 +30,7 @@ public class TicketmasterFeeder {
                 String artists = rs.getString("artists");
                 String priceInfo = rs.getString("priceInfo");
 
-                // Aquí se crea la descripción del evento
                 String description = String.format("Artistas: %s | Lugar: %s, %s (%s) | Precio: %s", artists, venue, city, country, priceInfo);
-
-                // Llamar a la función para enviar el evento al broker, pasando los valores correctos
                 sendTicketmasterEventToBroker(name, description);
             }
 
@@ -55,10 +54,13 @@ public class TicketmasterFeeder {
             producer = session.createProducer(topic);
 
             long timestamp = System.currentTimeMillis();
-            String sourceSystem = "Ticketmaster";
+            String sourceSystem = "TicketmasterFeeder";
 
-            // Ahora se pasan todos los parámetros correctos al constructor de Event
-            Event event = new Event(timestamp, sourceSystem, name, description);
+            Map<String, Object> data = new HashMap<>();
+            data.put("name", name);
+            data.put("description", description);
+
+            Event event = new Event(timestamp, sourceSystem, data);
 
             Gson gson = new Gson();
             String jsonMessage = gson.toJson(event);
@@ -77,37 +79,6 @@ public class TicketmasterFeeder {
             } catch (JMSException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    // Clase interna para representar los eventos
-    class Event {
-        private long ts;
-        private String ss;
-        private String name;
-        private String description;
-
-        public Event(long ts, String ss, String name, String description) {
-            this.ts = ts;
-            this.ss = ss;
-            this.name = name;
-            this.description = description;
-        }
-
-        public long getTs() {
-            return ts;
-        }
-
-        public String getSs() {
-            return ss;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getDescription() {
-            return description;
         }
     }
 }

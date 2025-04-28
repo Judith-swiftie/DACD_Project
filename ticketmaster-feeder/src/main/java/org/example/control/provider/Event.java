@@ -21,14 +21,37 @@ public class Event {
         this.priceInfo = priceInfo;
     }
 
-    public String getName() { return name; }
-    public String getDate() { return date; }
-    public String getTime() { return time; }
-    public String getVenue() { return venue; }
-    public String getCity() { return city; }
-    public String getCountry() { return country; }
-    public String getArtists() { return artists; }
-    public String getPriceInfo() { return priceInfo; }
+    public String getName() {
+        return name;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public String getVenue() {
+        return venue;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public String getArtists() {
+        return artists;
+    }
+
+    public String getPriceInfo() {
+        return priceInfo;
+    }
 
     public void printDetails() {
         System.out.println("🎶 Evento: " + name);
