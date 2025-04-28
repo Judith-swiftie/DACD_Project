@@ -1,13 +1,13 @@
-package org.example.control.provider;
+package org.example.model;
 
+import org.example.control.provider.Event;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EventTest {
 
     @Test
-    public void testEventCreation() {
+    public void testEventConstructor() {
         Event event = new Event("Rock Fest", "2025-06-15", "20:00", "Rock Arena", "Madrid", "España", "The Rockers", "30 - 50 EUR");
 
         assertEquals("Rock Fest", event.getName());
