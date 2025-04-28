@@ -3,7 +3,11 @@ package org.example;
 import jakarta.jms.*;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import com.google.gson.Gson;
+import org.example.control.store.MusicStore;
+import org.example.control.store.SqliteMusicStore;
+import org.example.model.Artist;
 
+import java.util.List;
 import java.util.Map;
 
 public class SpotifyFeeder {
@@ -12,40 +16,47 @@ public class SpotifyFeeder {
     private static final String TOPIC = "playlist";
     private static final String CLIENT_ID = "spotifyFeeder";
 
+    private final MusicStore musicStore;
     private final ConnectionFactory factory;
     private final Gson gson;
 
-    public SpotifyFeeder() {
-        this.factory = (ConnectionFactory) new ActiveMQConnectionFactory(BROKER_URL);
+    public SpotifyFeeder(String dbUrl) {
+        this.musicStore = new SqliteMusicStore(dbUrl);
+        this.factory = new ActiveMQConnectionFactory(BROKER_URL);
         this.gson = new Gson();
     }
 
+    public List<Artist> getArtistsFromDatabase() {
+        return ((SqliteMusicStore) musicStore).getAllArtists();
+    }
+
     public void sendSpotifyEvents() {
-        try {
-            Connection connection = factory.createConnection();
-            connection.setClientID(CLIENT_ID);
+        try (Connection connection = factory.createConnection();
+             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+             MessageProducer producer = session.createProducer(session.createTopic(TOPIC))) {
+
             connection.start();
 
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Topic topic = session.createTopic(TOPIC);
-            MessageProducer producer = session.createProducer(topic);
+            List<Artist> artists = getArtistsFromDatabase();
 
-            Event event = new Event(System.currentTimeMillis(), "SpotifyFeeder", Map.of("artist", "Dua Lipa"));
-            String jsonEvent = gson.toJson(event);
+            for (Artist artist : artists) {
+                List<String> trackNames = musicStore.getTracksByArtistId(artist.getId());
 
-            TextMessage message = session.createTextMessage(jsonEvent);
-            producer.send(message);
+                Event event = new Event(System.currentTimeMillis(), "SpotifyFeeder",
+                        Map.of("artist", artist.getName(), "tracks", trackNames));
+                String jsonEvent = gson.toJson(event);
 
-            System.out.println("📡 Evento enviado al topic [" + TOPIC + "]:");
-            System.out.println("    ➤ " + jsonEvent);
+                TextMessage message = session.createTextMessage(jsonEvent);
+                producer.send(message);
 
-
-            producer.close();
-            session.close();
-            connection.close();
+                System.out.println("📡 Evento enviado al topic [" + TOPIC + "]:");
+                System.out.println("    ➤ " + jsonEvent);
+            }
 
         } catch (JMSException e) {
-            System.err.println("❌ Error en la conexión o envío de mensaje: " + e.getMessage());
+            System.err.println("❌ Error enviando evento: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
 }

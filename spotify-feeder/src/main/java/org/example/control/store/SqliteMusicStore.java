@@ -1,5 +1,6 @@
 package org.example.control.store;
 
+import org.example.model.Artist;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,16 +15,20 @@ public class SqliteMusicStore implements MusicStore {
     }
 
     public void createTables() {
-        String createArtistsTable = "CREATE TABLE IF NOT EXISTS artists (" +
-                "id TEXT PRIMARY KEY, " +
-                "name TEXT NOT NULL)";
+        String createArtistsTable = """
+            CREATE TABLE IF NOT EXISTS artists (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL
+            )""";
 
-        String createTracksTable = "CREATE TABLE IF NOT EXISTS tracks (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "artist_id TEXT NOT NULL, " +
-                "track_name TEXT NOT NULL, " +
-                "UNIQUE(artist_id, track_name), " +
-                "FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE)";
+        String createTracksTable = """
+            CREATE TABLE IF NOT EXISTS tracks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                artist_id TEXT NOT NULL,
+                track_name TEXT NOT NULL,
+                UNIQUE(artist_id, track_name),
+                FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+            )""";
 
         try (Connection connection = DriverManager.getConnection(url);
              Statement statement = connection.createStatement()) {
@@ -34,47 +39,36 @@ public class SqliteMusicStore implements MusicStore {
         }
     }
 
+    public List<Artist> getAllArtists() {
+        List<Artist> artists = new ArrayList<>();
+        String query = "SELECT id, name FROM artists";
+
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                String artistId = resultSet.getString("id");
+                String artistName = resultSet.getString("name");
+                artists.add(new Artist(artistId, artistName));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return artists;
+    }
+
     @Override
     public void store(String artistId, String artistName, List<String> tracks) {
         try (Connection connection = DriverManager.getConnection(url)) {
             connection.setAutoCommit(false);
 
-            String artistQuery = "SELECT * FROM artists WHERE id = ?";
-            try (PreparedStatement artistStatement = connection.prepareStatement(artistQuery)) {
-                artistStatement.setString(1, artistId);
-                ResultSet artistResult = artistStatement.executeQuery();
+            insertArtistIfNotExists(connection, artistId, artistName);
+            insertTracksIfNotExists(connection, artistId, tracks);
 
-                if (!artistResult.next()) {
-                    String insertArtistQuery = "INSERT INTO artists (id, name) VALUES (?, ?)";
-                    try (PreparedStatement insertArtistStatement = connection.prepareStatement(insertArtistQuery)) {
-                        insertArtistStatement.setString(1, artistId);
-                        insertArtistStatement.setString(2, artistName);
-                        insertArtistStatement.executeUpdate();
-                    }
-                }
-            }
-
-            for (String track : tracks) {
-                String trackQuery = "SELECT * FROM tracks WHERE artist_id = ? AND track_name = ?";
-                try (PreparedStatement trackStatement = connection.prepareStatement(trackQuery)) {
-                    trackStatement.setString(1, artistId);
-                    trackStatement.setString(2, track);
-                    ResultSet trackResult = trackStatement.executeQuery();
-
-                    if (!trackResult.next()) {
-                        String insertTrackQuery = "INSERT INTO tracks (artist_id, track_name) VALUES (?, ?)";
-                        try (PreparedStatement insertTrackStatement = connection.prepareStatement(insertTrackQuery)) {
-                            insertTrackStatement.setString(1, artistId);
-                            insertTrackStatement.setString(2, track);
-                            insertTrackStatement.executeUpdate();
-                        }
-                    }
-                }
-            }
-
-            connection.commit();  // Commit de la transacción
+            connection.commit();
         } catch (SQLException e) {
-            e.printStackTrace();  // Manejo de excepciones dentro del método
+            e.printStackTrace();
         }
     }
 
@@ -100,53 +94,46 @@ public class SqliteMusicStore implements MusicStore {
     @Override
     public boolean hasTracksChanged(String artistId, List<String> newTracks) {
         List<String> existingTracks = getTracksByArtistId(artistId);
-        return !new HashSet<>(existingTracks).equals(new HashSet<>(newTracks));  // Comparación de cambios
+        return !new HashSet<>(existingTracks).equals(new HashSet<>(newTracks));
     }
 
-    public void saveArtistAndTracks(String artistId, String artistName, List<String> tracks) {
-        try (Connection connection = DriverManager.getConnection(url)) {
-            connection.setAutoCommit(false);
+    // Métodos privados de inserción:
+    private void insertArtistIfNotExists(Connection connection, String artistId, String artistName) throws SQLException {
+        String query = "SELECT id FROM artists WHERE id = ?";
 
-            // Insertar o actualizar artista
-            String artistQuery = "SELECT * FROM artists WHERE id = ?";
-            try (PreparedStatement artistStatement = connection.prepareStatement(artistQuery)) {
-                artistStatement.setString(1, artistId);
-                ResultSet artistResult = artistStatement.executeQuery();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, artistId);
+            ResultSet resultSet = statement.executeQuery();
 
-                // Si el artista no existe, insertarlo
-                if (!artistResult.next()) {
-                    String insertArtistQuery = "INSERT INTO artists (id, name) VALUES (?, ?)";
-                    try (PreparedStatement insertArtistStatement = connection.prepareStatement(insertArtistQuery)) {
-                        insertArtistStatement.setString(1, artistId);
-                        insertArtistStatement.setString(2, artistName);
-                        insertArtistStatement.executeUpdate();
+            if (!resultSet.next()) {
+                String insert = "INSERT INTO artists (id, name) VALUES (?, ?)";
+                try (PreparedStatement insertStatement = connection.prepareStatement(insert)) {
+                    insertStatement.setString(1, artistId);
+                    insertStatement.setString(2, artistName);
+                    insertStatement.executeUpdate();
+                }
+            }
+        }
+    }
+
+    private void insertTracksIfNotExists(Connection connection, String artistId, List<String> tracks) throws SQLException {
+        String query = "SELECT track_name FROM tracks WHERE artist_id = ? AND track_name = ?";
+
+        for (String track : tracks) {
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, artistId);
+                statement.setString(2, track);
+                ResultSet resultSet = statement.executeQuery();
+
+                if (!resultSet.next()) {
+                    String insert = "INSERT INTO tracks (artist_id, track_name) VALUES (?, ?)";
+                    try (PreparedStatement insertStatement = connection.prepareStatement(insert)) {
+                        insertStatement.setString(1, artistId);
+                        insertStatement.setString(2, track);
+                        insertStatement.executeUpdate();
                     }
                 }
             }
-
-            // Insertar o actualizar canciones
-            for (String track : tracks) {
-                String trackQuery = "SELECT * FROM tracks WHERE artist_id = ? AND track_name = ?";
-                try (PreparedStatement trackStatement = connection.prepareStatement(trackQuery)) {
-                    trackStatement.setString(1, artistId);
-                    trackStatement.setString(2, track);
-                    ResultSet trackResult = trackStatement.executeQuery();
-
-                    // Si la canción no existe, insertarla
-                    if (!trackResult.next()) {
-                        String insertTrackQuery = "INSERT INTO tracks (artist_id, track_name) VALUES (?, ?)";
-                        try (PreparedStatement insertTrackStatement = connection.prepareStatement(insertTrackQuery)) {
-                            insertTrackStatement.setString(1, artistId);
-                            insertTrackStatement.setString(2, track);
-                            insertTrackStatement.executeUpdate();
-                        }
-                    }
-                }
-            }
-
-            connection.commit();  // Commit de la transacción
-        } catch (SQLException e) {
-            e.printStackTrace();  // Manejo de excepciones dentro del método
         }
     }
 }

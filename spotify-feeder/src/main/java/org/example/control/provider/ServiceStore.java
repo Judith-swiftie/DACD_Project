@@ -1,7 +1,6 @@
 package org.example.control.provider;
 
 import org.json.JSONObject;
-
 import java.util.List;
 
 public interface ServiceStore {
