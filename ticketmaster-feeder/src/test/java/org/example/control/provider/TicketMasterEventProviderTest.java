@@ -2,24 +2,23 @@ package org.example.control.provider;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.*;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TicketmasterServiceTest {
+class TicketMasterEventProviderTest {
 
-    private TicketmasterService ticketmasterService;
+    private TicketMasterEventProvider ticketMasterEventProvider;
 
     @BeforeEach
     void setUp() {
-        ticketmasterService = new TicketmasterService();
+        ticketMasterEventProvider = new TicketMasterEventProvider();
     }
 
     @Test
     void testFetchMusicEvents() {
-        List<Event> events = ticketmasterService.fetchMusicEvents();
+        List<Event> events = ticketMasterEventProvider.fetchMusicEvents();
 
         assertNotNull(events);
         assertTrue(events.size() > 0, "Debe haber al menos un evento");

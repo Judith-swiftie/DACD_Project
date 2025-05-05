@@ -1,6 +1,7 @@
 package org.example;
 
 import jakarta.jms.JMSException;
+import org.example.control.Controller;
 import org.example.control.provider.SpotifyArtistService;
 import org.example.control.provider.SpotifyAuth;
 import org.example.control.provider.SpotifyClient;
@@ -16,7 +17,7 @@ public class Main {
                 throw new IllegalArgumentException("La URL de la base de datos no está configurada.");
             }
 
-            SpotifyFeeder feeder = new SpotifyFeeder(dbUrl);
+            Controller feeder = new Controller(dbUrl);
             feeder.sendSpotifyEvents();
 
             SqliteMusicStore store = new SqliteMusicStore(dbUrl);

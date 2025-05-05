@@ -1,25 +1,26 @@
 package org.example;
 
+import org.example.control.Controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TicketmasterFeederTest {
+class ControllerTest {
 
-    private TicketmasterFeeder ticketmasterFeeder;
+    private Controller controller;
 
     @BeforeEach
     void setUp() {
-        ticketmasterFeeder = new TicketmasterFeeder();
+        controller = new Controller();
     }
 
     @Test
     void testSendTicketmasterEventToBroker() throws Exception {
-        Method method = TicketmasterFeeder.class.getDeclaredMethod("sendTicketmasterEventToBroker", String.class, String.class);
+        Method method = Controller.class.getDeclaredMethod("sendTicketmasterEventToBroker", String.class, String.class);
         method.setAccessible(true);
-        method.invoke(ticketmasterFeeder, "Event Name", "Description");
+        method.invoke(controller, "Event Name", "Description");
         assertTrue(true, "Método invocado correctamente.");
     }
 }

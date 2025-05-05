@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.control.Controller;
 import org.example.control.store.SqliteMusicStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,15 +9,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SpotifyFeederTest {
+public class ControllerTest {
 
     private SqliteMusicStore musicStore;
-    private SpotifyFeeder feeder;
+    private Controller feeder;
 
     @BeforeEach
     public void setUp() {
         musicStore = new SqliteMusicStore(System.getenv("DB_URL"));
-        feeder = new SpotifyFeeder(System.getenv("DB_URL"));
+        feeder = new Controller(System.getenv("DB_URL"));
 
         musicStore.createTables();
 

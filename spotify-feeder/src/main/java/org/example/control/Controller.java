@@ -1,4 +1,4 @@
-package org.example;
+package org.example.control;
 
 import jakarta.jms.*;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -10,7 +10,7 @@ import org.example.model.Artist;
 import java.util.List;
 import java.util.Map;
 
-public class SpotifyFeeder {
+public class Controller {
 
     private static final String BROKER_URL = "tcp://localhost:61616";
     private static final String TOPIC = "playlist";
@@ -20,7 +20,7 @@ public class SpotifyFeeder {
     private final ConnectionFactory factory;
     private final Gson gson;
 
-    public SpotifyFeeder(String dbUrl) {
+    public Controller(String dbUrl) {
         this.musicStore = new SqliteMusicStore(dbUrl);
         this.factory = new ActiveMQConnectionFactory(BROKER_URL);
         this.gson = new Gson();

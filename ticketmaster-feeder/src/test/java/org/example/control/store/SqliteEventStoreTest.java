@@ -1,6 +1,6 @@
 package org.example.control.store;
 
-import org.example.control.provider.Event;
+import org.example.model.Event;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;

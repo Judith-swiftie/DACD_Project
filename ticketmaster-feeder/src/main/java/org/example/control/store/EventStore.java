@@ -1,6 +1,6 @@
 package org.example.control.store;
 
-import org.example.control.provider.Event;
+import org.example.model.Event;
 import java.util.List;
 
 public interface EventStore {

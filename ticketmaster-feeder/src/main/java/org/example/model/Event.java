@@ -1,8 +1,12 @@
 package org.example.model;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 public class Event {
+    private Instant ts;
+    private String ss;
     private String name;
     private String date;
     private String time;
@@ -21,6 +25,9 @@ public class Event {
         this.country = country;
         this.artists = artists;
         this.priceInfo = priceInfo;
+    }
+
+    public Event(long timestamp, String sourceSystem, Map<String, Object> data) {
     }
 
     public String getName() {

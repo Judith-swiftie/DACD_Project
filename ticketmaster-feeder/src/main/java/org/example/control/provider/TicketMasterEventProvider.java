@@ -6,11 +6,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import org.example.model.Artist;
+import org.example.model.Event;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TicketmasterService implements ServiceStore {
+public class TicketMasterEventProvider implements MusicalEventProvider {
     private static final String API_KEY = System.getenv("API_KEY");
     private static final String BASE_URL = "https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + API_KEY + "&countryCode=ES";
     private static final int TOTAL_PAGES = 20;
@@ -74,15 +75,14 @@ public class TicketmasterService implements ServiceStore {
         }
 
         JsonNode performersNode = event.path("_embedded").path("attractions");
-        StringBuilder artists = new StringBuilder();
+        List<Artist> artists = new ArrayList<>();
         if (performersNode.isArray()) {
             for (JsonNode performer : performersNode) {
-                artists.append(performer.path("name").asText()).append(", ");
-            }
-            if (!artists.isEmpty()) {
-                artists.setLength(artists.length() - 2);
+                String artistName = performer.path("name").asText();
+                artists.add(new Artist(artistName));
             }
         }
+
 
         JsonNode priceRanges = event.path("priceRanges");
         String priceInfo = "No disponible";
@@ -95,6 +95,6 @@ public class TicketmasterService implements ServiceStore {
             }
         }
 
-        return new Event(name, date, time, venue, city, country, artists.toString(), priceInfo);
+        return new Event(name, date, time, venue, city, country, artists, priceInfo);
     }
 }

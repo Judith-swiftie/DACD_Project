@@ -1,6 +1,7 @@
 package org.example.control.store;
 
-import org.example.control.provider.Event;
+import org.example.model.Event;
+import org.example.model.Artist;
 
 import java.nio.file.Paths;
 import java.sql.*;
@@ -8,63 +9,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SqliteEventStore implements EventStore {
+
     private static final String DB_URL = System.getenv("DB_URL");
 
     public SqliteEventStore() {
         try {
             Class.forName("org.sqlite.JDBC");
-
-            String dbPath = Paths.get("database.db").toAbsolutePath().toString();
-            System.out.println("La base de datos se guarda en: " + dbPath);
-
             Connection connection = DriverManager.getConnection(DB_URL);
-            System.out.println("Conexión exitosa a la base de datos SQLite");
-
+            System.out.println("Conexión exitosa a SQLite en: " + DB_URL);
             createTable();
-
-        } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("Error al conectar a la base de datos: " + e.getMessage());
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("❌ Error al conectar a SQLite: " + e.getMessage());
         }
     }
 
     private void createTable() {
+        String sql = """
+            CREATE TABLE IF NOT EXISTS events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                date TEXT NOT NULL,
+                time TEXT,
+                venue TEXT NOT NULL,
+                city TEXT,
+                country TEXT,
+                artists TEXT,
+                priceInfo TEXT,
+                UNIQUE(name, date, venue)
+            )
+        """;
+
         try (Connection conn = DriverManager.getConnection(DB_URL);
              Statement stmt = conn.createStatement()) {
-            String sql = "CREATE TABLE IF NOT EXISTS events (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "name TEXT NOT NULL, " +
-                    "date TEXT NOT NULL, " +
-                    "time TEXT, " +
-                    "venue TEXT NOT NULL, " +
-                    "city TEXT, " +
-                    "country TEXT, " +
-                    "artists TEXT, " +
-                    "priceInfo TEXT, " +
-                    "UNIQUE(name, date, venue))";
             stmt.execute(sql);
-            System.out.println("Tabla 'events' creada (si no existía).");
         } catch (SQLException e) {
-            System.err.println("Error al crear la tabla: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("❌ Error al crear tabla: " + e.getMessage());
         }
     }
 
     @Override
     public void saveEvents(List<Event> events) {
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            createTable();
-
             for (Event event : events) {
                 if (!eventExists(conn, event)) {
                     insertEvent(conn, event);
-                } else {
-                    System.out.println("El evento ya existe: " + event.getName());
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al guardar los eventos: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("❌ Error guardando eventos: " + e.getMessage());
         }
     }
 
@@ -76,23 +68,27 @@ public class SqliteEventStore implements EventStore {
         try (Connection conn = DriverManager.getConnection(DB_URL);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-
             while (rs.next()) {
-                Event event = new Event(
+                String artistsRaw = rs.getString("artists");
+                List<Artist> artistList = new ArrayList<>();
+                if (artistsRaw != null && !artistsRaw.isEmpty()) {
+                    for (String name : artistsRaw.split(",\\s*")) {
+                        artistList.add(new Artist(name));
+                    }
+                }
+                events.add(new Event(
                         rs.getString("name"),
                         rs.getString("date"),
                         rs.getString("time"),
                         rs.getString("venue"),
                         rs.getString("city"),
                         rs.getString("country"),
-                        rs.getString("artists"),
+                        artistList,
                         rs.getString("priceInfo")
-                );
-                events.add(event);
+                ));
             }
         } catch (SQLException e) {
-            System.err.println("Error al obtener los eventos: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("❌ Error al obtener eventos: " + e.getMessage());
         }
 
         return events;
@@ -103,11 +99,16 @@ public class SqliteEventStore implements EventStore {
         String sql = "SELECT * FROM events WHERE name = ?";
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, name);
             ResultSet rs = pstmt.executeQuery();
-
             if (rs.next()) {
+                String artistsRaw = rs.getString("artists");
+                List<Artist> artistList = new ArrayList<>();
+                if (artistsRaw != null && !artistsRaw.isEmpty()) {
+                    for (String nameStr : artistsRaw.split(",\\s*")) {
+                        artistList.add(new Artist(nameStr));
+                    }
+                }
                 return new Event(
                         rs.getString("name"),
                         rs.getString("date"),
@@ -115,55 +116,32 @@ public class SqliteEventStore implements EventStore {
                         rs.getString("venue"),
                         rs.getString("city"),
                         rs.getString("country"),
-                        rs.getString("artists"),
+                        artistList,
                         rs.getString("priceInfo")
                 );
             }
         } catch (SQLException e) {
-            System.err.println("Error al buscar el evento: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("❌ Error al buscar evento: " + e.getMessage());
         }
-
         return null;
     }
 
     @Override
     public void deleteEventByName(String name) {
         String sql = "DELETE FROM events WHERE name = ?";
-
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, name);
-            int rowsAffected = pstmt.executeUpdate();
-            System.out.println("Eventos eliminados: " + rowsAffected);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Error al eliminar el evento: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("❌ Error al eliminar evento: " + e.getMessage());
         }
     }
 
     @Override
     public void updateEvent(Event event) {
-        String sql = "UPDATE events SET date = ?, time = ?, venue = ?, city = ?, country = ?, artists = ?, priceInfo = ? WHERE name = ?";
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, event.getDate());
-            pstmt.setString(2, event.getTime());
-            pstmt.setString(3, event.getVenue());
-            pstmt.setString(4, event.getCity());
-            pstmt.setString(5, event.getCountry());
-            pstmt.setString(6, event.getArtists());
-            pstmt.setString(7, event.getPriceInfo());
-            pstmt.setString(8, event.getName());
-            int rowsAffected = pstmt.executeUpdate();
-            System.out.println("Eventos actualizados: " + rowsAffected);
-        } catch (SQLException e) {
-            System.err.println("Error al actualizar el evento: " + e.getMessage());
-            e.printStackTrace();
-        }
+        deleteEventByName(event.getName());
+        saveEvents(List.of(event));
     }
 
     private boolean eventExists(Connection conn, Event event) throws SQLException {
@@ -186,10 +164,16 @@ public class SqliteEventStore implements EventStore {
             pstmt.setString(4, event.getVenue());
             pstmt.setString(5, event.getCity());
             pstmt.setString(6, event.getCountry());
-            pstmt.setString(7, event.getArtists());
+
+            // Convertir la lista de artistas a un string separando con comas
+            String artistNames = event.getArtists().stream()
+                    .map(Artist::getName)
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("");
+            pstmt.setString(7, artistNames);
+
             pstmt.setString(8, event.getPriceInfo());
             pstmt.executeUpdate();
-            System.out.println("Evento insertado: " + event.getName());
         }
     }
 }
