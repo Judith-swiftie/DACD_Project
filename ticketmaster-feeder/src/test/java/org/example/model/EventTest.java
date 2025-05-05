@@ -1,27 +1,66 @@
 package org.example.model;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EventTest {
+class EventTest {
 
     @Test
-    public void testEventConstructor() {
-        Event event = new Event("Rock Fest", "2025-06-15", "20:00", "Rock Arena", "Madrid", "España", "The Rockers", "30 - 50 EUR");
+    void testEventCreation() {
+        Artist artist1 = new Artist("Artista A");
+        Artist artist2 = new Artist("Artista B");
+        Event event = new Event("Concierto de Música", "2025-08-15", "21:00", "Auditorio Nacional", "Madrid", "España",
+                Arrays.asList(artist1, artist2), "20 - 40 EUR");
 
-        assertEquals("Rock Fest", event.getName());
-        assertEquals("2025-06-15", event.getDate());
-        assertEquals("20:00", event.getTime());
-        assertEquals("Rock Arena", event.getVenue());
+        assertEquals("Concierto de Música", event.getName());
+        assertEquals("2025-08-15", event.getDate());
+        assertEquals("21:00", event.getTime());
+        assertEquals("Auditorio Nacional", event.getVenue());
         assertEquals("Madrid", event.getCity());
         assertEquals("España", event.getCountry());
-        assertEquals("The Rockers", event.getArtists());
-        assertEquals("30 - 50 EUR", event.getPriceInfo());
+        assertEquals(2, event.getArtists().size());
+        assertEquals("20 - 40 EUR", event.getPriceInfo());
+
+        assertEquals("Artista A", event.getArtists().get(0).getName());
+        assertEquals("Artista B", event.getArtists().get(1).getName());
     }
 
     @Test
-    public void testPrintDetails() {
-        Event event = new Event("Jazz Night", "2025-04-10", "19:00", "Jazz Club", "Barcelona", "España", "The Jazz Band", "20 - 40 EUR");
-        assertDoesNotThrow(event::printDetails, "El método printDetails no debería lanzar excepciones.");
+    void testEventToString() {
+        Artist artist1 = new Artist("Artista A");
+        Artist artist2 = new Artist("Artista B");
+        Event event = new Event("Concierto de Música", "2025-08-15", "21:00", "Auditorio Nacional", "Madrid", "España",
+                Arrays.asList(artist1, artist2), "20 - 40 EUR");
+
+        String expected = "🎫 Evento: Concierto de Música\n" +
+                "📅 Fecha: 2025-08-15\n" +
+                "⏰ Hora: 21:00\n" +
+                "📍 Lugar: Auditorio Nacional\n" +
+                "🏙️ Ciudad: Madrid\n" +
+                "🌍 País: España\n" +
+                "🎤 Artistas: Artista A, Artista B\n" +
+                "💰 Precios: 20 - 40 EUR";
+
+        assertEquals(expected, event.toString());
+    }
+
+    @Test
+    void testEventToStringWithNoArtists() {
+        Event event = new Event("Concierto de Música", "2025-08-15", "21:00", "Auditorio Nacional", "Madrid", "España",
+                Arrays.asList(), "20 - 40 EUR");
+
+        String expected = "🎫 Evento: Concierto de Música\n" +
+                "📅 Fecha: 2025-08-15\n" +
+                "⏰ Hora: 21:00\n" +
+                "📍 Lugar: Auditorio Nacional\n" +
+                "🏙️ Ciudad: Madrid\n" +
+                "🌍 País: España\n" +
+                "🎤 Artistas: No disponible\n" +
+                "💰 Precios: 20 - 40 EUR";
+
+        assertEquals(expected, event.toString());
     }
 }

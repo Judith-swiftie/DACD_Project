@@ -1,46 +1,71 @@
 package org.example.control.store;
 
+import org.example.model.Artist;
 import org.example.model.Event;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.ArrayList;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SqliteEventStoreTest {
+class SqliteEventStoreTest {
 
-    @Test
-    public void testSaveEvents() {
-        SqliteEventStore store = new SqliteEventStore();
-        List<Event> events = new ArrayList<>();
-        events.add(new Event("Indie Night", "2025-05-15", "21:00", "Indie Club", "Valencia", "España", "The Indies", "10 - 20 EUR"));
+    private SqliteEventStore eventStore;
+    private static final String DB_URL = "jdbc:sqlite::memory:"; // Base de datos en memoria para pruebas
 
-        assertDoesNotThrow(() -> store.saveEvents(events), "Guardar eventos no debe lanzar excepciones.");
+    @BeforeEach
+    void setUp() {
+        System.setProperty("DB_URL", DB_URL);
+        eventStore = new SqliteEventStore();
+    }
+
+    @AfterEach
+    void tearDown() {
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            conn.createStatement().execute("DROP TABLE IF EXISTS events");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
-    public void testGetAllEvents() {
-        SqliteEventStore store = new SqliteEventStore();
-        List<Event> events = store.getAllEvents();
+    void testSaveAndGetEvents() {
+        Event event = new Event("Concierto de Rock", "2025-05-15", "20:00", "Auditorio", "Madrid", "España",
+                Arrays.asList(new Artist("Banda 1"), new Artist("Banda 2")), "20 - 40 EUR");
 
-        assertNotNull(events, "La lista de eventos no debe ser nula.");
+        eventStore.saveEvents(List.of(event));
+
+        List<Event> events = eventStore.getAllEvents();
+        assertEquals("Concierto de Rock", events.get(0).getName());
+        assertEquals("2025-05-15", events.get(0).getDate());
     }
 
     @Test
-    public void testFindEventByName() {
-        SqliteEventStore store = new SqliteEventStore();
-        Event event = store.findEventByName("Indie Night");
+    void testEventExists() {
+        Event event = new Event("Concierto de Pop", "2025-06-20", "19:00", "Teatro", "Barcelona", "España",
+                Arrays.asList(new Artist("Banda A")), "25 - 50 EUR");
 
-        assertNotNull(event, "El evento debe existir en la base de datos.");
-        assertEquals("Indie Night", event.getName());
+        eventStore.saveEvents(List.of(event));
+        Event foundEvent = eventStore.findEventByName("Concierto de Pop");
+
+        assertNotNull(foundEvent);
+        assertEquals("Concierto de Pop", foundEvent.getName());
     }
 
     @Test
-    public void testDeleteEventByName() {
-        SqliteEventStore store = new SqliteEventStore();
-        store.deleteEventByName("Indie Night");
+    void testDeleteEvent() {
+        Event event = new Event("Concierto de Jazz", "2025-07-10", "21:00", "Sala de Jazz", "Sevilla", "España",
+                Arrays.asList(new Artist("Banda X")), "30 - 60 EUR");
 
-        Event event = store.findEventByName("Indie Night");
-        assertNull(event, "El evento debería haber sido eliminado.");
+        eventStore.saveEvents(List.of(event));
+        eventStore.deleteEventByName("Concierto de Jazz");
+
+        Event foundEvent = eventStore.findEventByName("Concierto de Jazz");
+        assertNull(foundEvent);
     }
 }
