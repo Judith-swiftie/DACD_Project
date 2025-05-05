@@ -97,7 +97,6 @@ public class SqliteMusicStore implements MusicStore {
         return !new HashSet<>(existingTracks).equals(new HashSet<>(newTracks));
     }
 
-    // Métodos privados de inserción:
     private void insertArtistIfNotExists(Connection connection, String artistId, String artistName) throws SQLException {
         String query = "SELECT id FROM artists WHERE id = ?";
 

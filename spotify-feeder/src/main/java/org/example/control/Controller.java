@@ -1,62 +1,41 @@
 package org.example.control;
 
-import jakarta.jms.*;
-import org.apache.activemq.ActiveMQConnectionFactory;
-import com.google.gson.Gson;
-import org.example.control.store.MusicStore;
-import org.example.control.store.SqliteMusicStore;
-import org.example.model.Artist;
-
+import org.example.control.provider.SpotifyArtistService;
+import org.example.control.provider.SpotifyClient;
+import org.example.control.store.ActiveMQMusicStore;
 import java.util.List;
-import java.util.Map;
+import org.json.JSONObject;
 
 public class Controller {
 
-    private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String TOPIC = "playlist";
-    private static final String CLIENT_ID = "spotifyFeeder";
+    private static final String BROKER_URL = "tcp://localhost:61616";  // URL del broker ActiveMQ
+    private final ActiveMQMusicStore musicStore;
+    private final SpotifyArtistService musicProvider;
 
-    private final MusicStore musicStore;
-    private final ConnectionFactory factory;
-    private final Gson gson;
-
-    public Controller(String dbUrl) {
-        this.musicStore = new SqliteMusicStore(dbUrl);
-        this.factory = new ActiveMQConnectionFactory(BROKER_URL);
-        this.gson = new Gson();
+    public Controller(String token) {
+        SpotifyClient spotifyClient = new SpotifyClient(token);
+        this.musicProvider = new SpotifyArtistService(spotifyClient);
+        this.musicStore = new ActiveMQMusicStore(BROKER_URL, musicProvider);
     }
 
-    public List<Artist> getArtistsFromDatabase() {
-        return ((SqliteMusicStore) musicStore).getAllArtists();
-    }
+    public void fetchAndSendEvents() {
+        String artistName = "Taylor Swift";
 
-    public void sendSpotifyEvents() {
-        try (Connection connection = factory.createConnection();
-             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-             MessageProducer producer = session.createProducer(session.createTopic(TOPIC))) {
-
-            connection.start();
-
-            List<Artist> artists = getArtistsFromDatabase();
-
-            for (Artist artist : artists) {
-                List<String> trackNames = musicStore.getTracksByArtistId(artist.getId());
-
-                Event event = new Event(System.currentTimeMillis(), "SpotifyFeeder",
-                        Map.of("artist", artist.getName(), "tracks", trackNames));
-                String jsonEvent = gson.toJson(event);
-
-                TextMessage message = session.createTextMessage(jsonEvent);
-                producer.send(message);
-
-                System.out.println("📡 Evento enviado al topic [" + TOPIC + "]:");
-                System.out.println("    ➤ " + jsonEvent);
+        try {
+            JSONObject artist = musicProvider.findArtistByName(artistName);
+            if (artist != null) {
+                List<String> tracks = musicStore.getTracksByArtistId(artist.getString("id"));
+                if (!tracks.isEmpty()) {
+                    musicStore.store(artist.getString("id"), artist.getString("name"), tracks);
+                } else {
+                    System.out.println("⚠️ No se encontraron canciones populares para el artista: " + artistName);
+                }
+            } else {
+                System.out.println("⚠️ No se encontró el artista: " + artistName);
             }
-
-        } catch (JMSException e) {
-            System.err.println("❌ Error enviando evento: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("❌ Error al obtener datos de Spotify o al enviar eventos al broker: " + e.getMessage());
             e.printStackTrace();
         }
     }
-
 }

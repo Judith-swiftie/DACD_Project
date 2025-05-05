@@ -24,6 +24,11 @@ public class SpotifyAuth {
                 .build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new Exception("Error al obtener el token: " + response.body());
+        }
+
         JSONObject jsonResponse = new JSONObject(response.body());
         return jsonResponse.getString("access_token");
     }
