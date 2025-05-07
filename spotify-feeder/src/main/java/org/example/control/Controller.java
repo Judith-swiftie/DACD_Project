@@ -28,13 +28,13 @@ public class Controller {
                 if (!tracks.isEmpty()) {
                     musicStore.store(artist.getString("id"), artist.getString("name"), tracks);
                 } else {
-                    System.out.println("⚠️ No se encontraron canciones populares para el artista: " + artistName);
+                    System.out.println("⚠ No se encontraron canciones populares para el artista: " + artistName);
                 }
             } else {
-                System.out.println("⚠️ No se encontró el artista: " + artistName);
+                System.out.println("⚠ No se encontró el artista: " + artistName);
             }
         } catch (Exception e) {
-            System.err.println("❌ Error al obtener datos de Spotify o al enviar eventos al broker: " + e.getMessage());
+            System.err.println("---Error al obtener datos de Spotify o al enviar eventos al broker: " + e.getMessage());
             e.printStackTrace();
         }
     }

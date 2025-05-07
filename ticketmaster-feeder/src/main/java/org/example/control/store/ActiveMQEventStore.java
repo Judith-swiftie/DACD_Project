@@ -33,10 +33,10 @@ public class ActiveMQEventStore implements EventStore {
                 String json = wrapEventAsJson(event);
                 TextMessage message = session.createTextMessage(json);
                 producer.send(message);
-                System.out.println("📤 Evento enviado a topic '" + topic.getTopicName() + "': " + event.getName());
+                System.out.println("Evento enviado a topic '" + topic.getTopicName() + "': " + event.getName());
             }
         } catch (JMSException e) {
-            System.err.println("❌ Error al enviar eventos a ActiveMQ: " + e.getMessage());
+            System.err.println("---Error al enviar eventos a ActiveMQ: " + e.getMessage());
         }
     }
 

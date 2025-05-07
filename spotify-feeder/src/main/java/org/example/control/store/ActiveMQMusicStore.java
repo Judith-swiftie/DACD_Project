@@ -35,11 +35,11 @@ public class ActiveMQMusicStore implements MusicStore {
                     String json = wrapArtistAsJson(artistId, artistName, tracks);
                     TextMessage message = session.createTextMessage(json);
                     producer.send(message);
-                    System.out.println("📤 Evento enviado a topic '" + topic.getTopicName() + "': " + artistName);
+                    System.out.println("Evento enviado a topic '" + topic.getTopicName() + "': " + artistName);
                 }
             }
         } catch (JMSException e) {
-            System.err.println("❌ Error al enviar eventos a ActiveMQ: " + e.getMessage());
+            System.err.println("---Error al enviar eventos a ActiveMQ: " + e.getMessage());
         }
     }
 
@@ -63,7 +63,7 @@ public class ActiveMQMusicStore implements MusicStore {
         try {
             return spotifyArtistService.getTopTracksByCountry(artistId, "ES");
         } catch (Exception e) {
-            System.err.println("❌ Error al obtener canciones de Spotify: " + e.getMessage());
+            System.err.println("---Error al obtener canciones de Spotify: " + e.getMessage());
             return List.of();
         }
     }

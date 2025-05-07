@@ -19,7 +19,7 @@ public class SqliteEventStore implements EventStore {
             System.out.println("Conexión exitosa a SQLite en: " + DB_URL);
             createTable();
         } catch (Exception e) {
-            System.err.println("❌ Error al conectar a SQLite: " + e.getMessage());
+            System.err.println("---Error al conectar a SQLite: " + e.getMessage());
         }
     }
 
@@ -43,7 +43,7 @@ public class SqliteEventStore implements EventStore {
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         } catch (SQLException e) {
-            System.err.println("❌ Error al crear tabla: " + e.getMessage());
+            System.err.println("---Error al crear tabla: " + e.getMessage());
         }
     }
 
@@ -56,7 +56,7 @@ public class SqliteEventStore implements EventStore {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("❌ Error guardando eventos: " + e.getMessage());
+            System.err.println("---Error guardando eventos: " + e.getMessage());
         }
     }
 
@@ -88,7 +88,7 @@ public class SqliteEventStore implements EventStore {
                 ));
             }
         } catch (SQLException e) {
-            System.err.println("❌ Error al obtener eventos: " + e.getMessage());
+            System.err.println("---Error al obtener eventos: " + e.getMessage());
         }
 
         return events;
@@ -121,7 +121,7 @@ public class SqliteEventStore implements EventStore {
                 );
             }
         } catch (SQLException e) {
-            System.err.println("❌ Error al buscar evento: " + e.getMessage());
+            System.err.println("---Error al buscar evento: " + e.getMessage());
         }
         return null;
     }
@@ -134,7 +134,7 @@ public class SqliteEventStore implements EventStore {
             pstmt.setString(1, name);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("❌ Error al eliminar evento: " + e.getMessage());
+            System.err.println("---Error al eliminar evento: " + e.getMessage());
         }
     }
 
@@ -165,7 +165,6 @@ public class SqliteEventStore implements EventStore {
             pstmt.setString(5, event.getCity());
             pstmt.setString(6, event.getCountry());
 
-            // Convertir la lista de artistas a un string separando con comas
             String artistNames = event.getArtists().stream()
                     .map(Artist::getName)
                     .reduce((a, b) -> a + ", " + b)

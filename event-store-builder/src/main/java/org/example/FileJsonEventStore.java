@@ -36,10 +36,10 @@ public class FileJsonEventStore implements JsonEventStore {
             Files.writeString(filePath, json + System.lineSeparator(),
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 
-            System.out.println("💾 JSON guardado en: " + filePath);
+            System.out.println("JSON guardado en: " + filePath);
 
         } catch (IOException e) {
-            System.err.println("❌ Error al guardar JSON: " + e.getMessage());
+            System.err.println("---Error al guardar JSON: " + e.getMessage());
         }
     }
 }

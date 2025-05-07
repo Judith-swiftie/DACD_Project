@@ -30,7 +30,7 @@ public class TicketMasterEventProvider implements MusicalEventProvider {
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
                 if (response.statusCode() == 429) {
-                    System.out.println("⚠️  Demasiadas solicitudes. Esperando 60 segundos antes de reintentar...");
+                    System.out.println("⚠ Demasiadas solicitudes. Esperando 60 segundos antes de reintentar...");
                     Thread.sleep(60000);
                     page--;
                     continue;
@@ -49,7 +49,7 @@ public class TicketMasterEventProvider implements MusicalEventProvider {
                         }
                     }
                 } else {
-                    System.out.println("❌ Error en la API: " + response.statusCode());
+                    System.out.println("---Error en la API: " + response.statusCode());
                     break;
                 }
             } catch (Exception e) {

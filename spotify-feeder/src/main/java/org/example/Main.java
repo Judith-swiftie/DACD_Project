@@ -16,7 +16,7 @@ public class Main {
             feeder.fetchAndSendEvents();
 
         } catch (Exception e) {
-            System.err.println("❌ Error: " + e.getMessage());
+            System.err.println("---Error: " + e.getMessage());
             e.printStackTrace();
         }
     }

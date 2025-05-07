@@ -21,19 +21,19 @@ public class SpotifyArtistService implements ServiceStore {
         JSONObject jsonResponse = new JSONObject(response);
 
         if (!jsonResponse.has("artists")) {
-            System.out.println("⚠️ La respuesta no contiene el objeto 'artists'.");
+            System.out.println("⚠ La respuesta no contiene el objeto 'artists'.");
             return null;
         }
 
         JSONArray artists = jsonResponse.getJSONObject("artists").getJSONArray("items");
         if (artists.isEmpty()) {
-            System.out.println("⚠️ No se encontraron artistas en la respuesta.");
+            System.out.println("⚠ No se encontraron artistas en la respuesta.");
             return null;
         }
 
         JSONObject artist = artists.getJSONObject(0);
         if (!artist.has("id")) {
-            System.out.println("⚠️ El objeto artista no contiene el campo 'id'.");
+            System.out.println("⚠ El objeto artista no contiene el campo 'id'.");
             return null;
         }
 
@@ -49,7 +49,7 @@ public class SpotifyArtistService implements ServiceStore {
         List<String> tracksList = new ArrayList<>();
 
         if (!jsonResponse.has("tracks")) {
-            System.out.println("⚠️ No se encontraron canciones populares en la respuesta.");
+            System.out.println("⚠ No se encontraron canciones populares en la respuesta.");
             return tracksList;
         }
 

@@ -27,23 +27,23 @@ public class EventStoreBuilder {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
             Topic topic = session.createTopic(topicName);
-            MessageConsumer consumer = session.createDurableSubscriber(topic, clientId);  // Suscripción duradera
+            MessageConsumer consumer = session.createDurableSubscriber(topic, clientId);
 
-            System.out.println("🟢 Esperando eventos en el topic: " + topicName);
+            System.out.println("Esperando eventos en el topic: " + topicName);
 
             consumer.setMessageListener(message -> {
                 if (message instanceof TextMessage textMessage) {
                     try {
                         String json = textMessage.getText();
-                        System.out.println("📥 Mensaje recibido: " + json);
+                        System.out.println("- Mensaje recibido: " + json);
                         jsonEventStore.saveJson(json);
-                        System.out.println("✅ Evento JSON almacenado.");
+                        System.out.println("- Evento JSON almacenado.");
                     } catch (Exception e) {
-                        System.err.println("❌ Error procesando el mensaje: " + e.getMessage());
+                        System.err.println("- Error procesando el mensaje: " + e.getMessage());
                         e.printStackTrace();
                     }
                 } else {
-                    System.err.println("⚠️ Mensaje recibido no es de tipo TextMessage.");
+                    System.err.println("- Mensaje recibido no es de tipo TextMessage.");
                 }
             });
 
