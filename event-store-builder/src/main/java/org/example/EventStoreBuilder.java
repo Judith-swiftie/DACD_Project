@@ -20,36 +20,39 @@ public class EventStoreBuilder {
 
     public void startEventStore() {
         try {
-            Connection connection = factory.createConnection();
-            connection.setClientID(clientId);
-            connection.start();
-
+            Connection connection = createConnection();
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
             Topic topic = session.createTopic(topicName);
             MessageConsumer consumer = session.createDurableSubscriber(topic, clientId);
-
+            consumer.setMessageListener(this::handleMessage);
             System.out.println("Esperando eventos en el topic: " + topicName);
-
-            consumer.setMessageListener(message -> {
-                if (message instanceof TextMessage textMessage) {
-                    try {
-                        String json = textMessage.getText();
-                        System.out.println("- Mensaje recibido: " + json);
-                        jsonEventStore.saveJson(json);
-                        System.out.println("- Evento JSON almacenado.");
-                    } catch (Exception e) {
-                        System.err.println("- Error procesando el mensaje: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                } else {
-                    System.err.println("- Mensaje recibido no es de tipo TextMessage.");
-                }
-            });
-
         } catch (JMSException e) {
-            System.err.println("❌ Error de conexión con el broker: " + e.getMessage());
+            System.err.println("---Error de conexión con el broker: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
+    private Connection createConnection() throws JMSException {
+        Connection connection = factory.createConnection();
+        connection.setClientID(clientId);
+        connection.start();
+        return connection;
+    }
+
+    private void handleMessage(Message message) {
+        if (message instanceof TextMessage textMessage) {
+            try {
+                String json = textMessage.getText();
+                System.out.println("- Mensaje recibido: " + json);
+                jsonEventStore.saveJson(json);
+                System.out.println("- Evento JSON almacenado.");
+            } catch (Exception e) {
+                System.err.println("- Error procesando el mensaje: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.err.println("- Mensaje recibido no es de tipo TextMessage.");
+        }
+    }
+
 }

@@ -26,27 +26,21 @@ public class Event {
     public String getName() {
         return name;
     }
-
     public String getDate() {
         return date;
     }
-
     public String getTime() {
         return time;
     }
-
     public String getVenue() {
         return venue;
     }
-
     public String getCity() {
         return city;
     }
-
     public String getCountry() {
         return country;
     }
-
     public List<Artist> getArtists() {
         return artists;
     }
@@ -54,35 +48,27 @@ public class Event {
     public String getPriceInfo() {
         return priceInfo;
     }
-
     public void setName(String name) {
         this.name = name;
     }
-
     public void setDate(String date) {
         this.date = date;
     }
-
     public void setTime(String time) {
         this.time = time;
     }
-
     public void setVenue(String venue) {
         this.venue = venue;
     }
-
     public void setCity(String city) {
         this.city = city;
     }
-
     public void setCountry(String country) {
         this.country = country;
     }
-
     public void setArtists(List<Artist> artists) {
         this.artists = artists;
     }
-
     public void setPriceInfo(String priceInfo) {
         this.priceInfo = priceInfo;
     }

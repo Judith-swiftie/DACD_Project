@@ -6,7 +6,6 @@ public class Main {
             JsonEventStore store = new FileJsonEventStore("playlist");
             new EventStoreBuilder("playlist", store).startEventStore();
         }).start();
-
         new Thread(() -> {
             JsonEventStore store = new FileJsonEventStore("events");
             new EventStoreBuilder("events", store).startEventStore();

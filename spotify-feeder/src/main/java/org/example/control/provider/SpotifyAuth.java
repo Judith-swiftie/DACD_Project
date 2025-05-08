@@ -15,20 +15,16 @@ public class SpotifyAuth {
     public static String getAccessToken() throws Exception {
         String credentials = CLIENT_ID + ":" + CLIENT_SECRET;
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
-
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(TOKEN_URL))
                 .header("Authorization", "Basic " + encodedCredentials)
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString("grant_type=client_credentials"))
                 .build();
-
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-
         if (response.statusCode() != 200) {
             throw new Exception("Error al obtener el token: " + response.body());
         }
-
         JSONObject jsonResponse = new JSONObject(response.body());
         return jsonResponse.getString("access_token");
     }

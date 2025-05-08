@@ -21,7 +21,6 @@ public class SpotifyClient {
                 .header("Content-Type", "application/json")
                 .GET()
                 .build();
-
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         return response.body();
     }

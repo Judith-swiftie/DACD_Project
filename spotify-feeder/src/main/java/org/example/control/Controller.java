@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 public class Controller {
 
-    private static final String BROKER_URL = "tcp://localhost:61616";  // URL del broker ActiveMQ
+    private static final String BROKER_URL = "tcp://localhost:61616";
     private final ActiveMQMusicStore musicStore;
     private final SpotifyArtistService musicProvider;
 
@@ -20,7 +20,6 @@ public class Controller {
 
     public void fetchAndSendEvents() {
         String artistName = "Taylor Swift";
-
         try {
             JSONObject artist = musicProvider.findArtistByName(artistName);
             if (artist != null) {
@@ -28,10 +27,10 @@ public class Controller {
                 if (!tracks.isEmpty()) {
                     musicStore.store(artist.getString("id"), artist.getString("name"), tracks);
                 } else {
-                    System.out.println("⚠ No se encontraron canciones populares para el artista: " + artistName);
+                    System.out.println("No se encontraron canciones populares para el artista: " + artistName);
                 }
             } else {
-                System.out.println("⚠ No se encontró el artista: " + artistName);
+                System.out.println("No se encontró el artista: " + artistName);
             }
         } catch (Exception e) {
             System.err.println("---Error al obtener datos de Spotify o al enviar eventos al broker: " + e.getMessage());

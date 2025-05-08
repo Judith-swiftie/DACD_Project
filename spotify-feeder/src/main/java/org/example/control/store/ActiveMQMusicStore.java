@@ -9,7 +9,6 @@ import java.util.Map;
 import java.time.Instant;
 
 public class ActiveMQMusicStore implements MusicStore {
-
     private final String url;
     private final String sourceName = "SpotifyFeeder";
     private final ConnectionFactory connectionFactory;
@@ -26,11 +25,8 @@ public class ActiveMQMusicStore implements MusicStore {
     public void store(String artistId, String artistName, List<String> tracks) {
         try (Connection connection = connectionFactory.createConnection()) {
             connection.start();
-
             try (Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)) {
-
                 Topic topic = session.createTopic(getTopicForArtist(artistName));
-
                 try (MessageProducer producer = session.createProducer(topic)) {
                     String json = wrapArtistAsJson(artistId, artistName, tracks);
                     TextMessage message = session.createTextMessage(json);

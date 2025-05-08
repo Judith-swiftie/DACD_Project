@@ -3,13 +3,11 @@ package org.example.control.store;
 import org.example.model.Event;
 import org.example.model.Artist;
 
-import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SqliteEventStore implements EventStore {
-
     private static final String DB_URL = System.getenv("DB_URL");
 
     public SqliteEventStore() {
@@ -64,7 +62,6 @@ public class SqliteEventStore implements EventStore {
     public List<Event> getAllEvents() {
         List<Event> events = new ArrayList<>();
         String sql = "SELECT * FROM events";
-
         try (Connection conn = DriverManager.getConnection(DB_URL);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -90,7 +87,6 @@ public class SqliteEventStore implements EventStore {
         } catch (SQLException e) {
             System.err.println("---Error al obtener eventos: " + e.getMessage());
         }
-
         return events;
     }
 
@@ -164,13 +160,11 @@ public class SqliteEventStore implements EventStore {
             pstmt.setString(4, event.getVenue());
             pstmt.setString(5, event.getCity());
             pstmt.setString(6, event.getCountry());
-
             String artistNames = event.getArtists().stream()
                     .map(Artist::getName)
                     .reduce((a, b) -> a + ", " + b)
                     .orElse("");
             pstmt.setString(7, artistNames);
-
             pstmt.setString(8, event.getPriceInfo());
             pstmt.executeUpdate();
         }

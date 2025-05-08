@@ -42,11 +42,9 @@ public class SqliteMusicStore implements MusicStore {
     public List<Artist> getAllArtists() {
         List<Artist> artists = new ArrayList<>();
         String query = "SELECT id, name FROM artists";
-
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
-
             while (resultSet.next()) {
                 String artistId = resultSet.getString("id");
                 String artistName = resultSet.getString("name");
@@ -62,10 +60,8 @@ public class SqliteMusicStore implements MusicStore {
     public void store(String artistId, String artistName, List<String> tracks) {
         try (Connection connection = DriverManager.getConnection(url)) {
             connection.setAutoCommit(false);
-
             insertArtistIfNotExists(connection, artistId, artistName);
             insertTracksIfNotExists(connection, artistId, tracks);
-
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -76,12 +72,10 @@ public class SqliteMusicStore implements MusicStore {
     public List<String> getTracksByArtistId(String artistId) {
         List<String> tracks = new ArrayList<>();
         String query = "SELECT track_name FROM tracks WHERE artist_id = ?";
-
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, artistId);
             ResultSet resultSet = statement.executeQuery();
-
             while (resultSet.next()) {
                 tracks.add(resultSet.getString("track_name"));
             }
@@ -103,7 +97,6 @@ public class SqliteMusicStore implements MusicStore {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, artistId);
             ResultSet resultSet = statement.executeQuery();
-
             if (!resultSet.next()) {
                 String insert = "INSERT INTO artists (id, name) VALUES (?, ?)";
                 try (PreparedStatement insertStatement = connection.prepareStatement(insert)) {
@@ -123,7 +116,6 @@ public class SqliteMusicStore implements MusicStore {
                 statement.setString(1, artistId);
                 statement.setString(2, track);
                 ResultSet resultSet = statement.executeQuery();
-
                 if (!resultSet.next()) {
                     String insert = "INSERT INTO tracks (artist_id, track_name) VALUES (?, ?)";
                     try (PreparedStatement insertStatement = connection.prepareStatement(insert)) {
