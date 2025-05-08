@@ -2,6 +2,7 @@ package org.example.control;
 
 import org.example.control.provider.TicketMasterEventProvider;
 import org.example.control.store.ActiveMQEventStore;
+import org.example.control.store.EventStore;
 import org.example.model.Event;
 
 import java.util.List;
@@ -15,6 +16,9 @@ public class Controller {
     public Controller() {
         this.eventStore = new ActiveMQEventStore(BROKER_URL);
         this.eventProvider = new TicketMasterEventProvider();
+    }
+    public EventStore getEventStore() {
+        return this.eventStore;
     }
 
     public void fetchAndSendEvents() {

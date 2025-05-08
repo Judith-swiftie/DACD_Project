@@ -5,12 +5,13 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.example.model.Event;
 
 import javax.jms.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.time.Instant;
 
 public class ActiveMQEventStore implements EventStore {
-
+    private final List<Event> storedEvents = new ArrayList<>();
     private final String url;
     private final String sourceName = "TicketmasterFeeder";
     private final ConnectionFactory connectionFactory;
@@ -23,10 +24,10 @@ public class ActiveMQEventStore implements EventStore {
 
     @Override
     public void saveEvents(List<Event> events) {
+        storedEvents.addAll(events);
         try (Connection connection = connectionFactory.createConnection()) {
             connection.start();
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
             for (Event event : events) {
                 Topic topic = session.createTopic(getTopicForEvent(event));
                 MessageProducer producer = session.createProducer(topic);
@@ -62,7 +63,7 @@ public class ActiveMQEventStore implements EventStore {
 
     @Override
     public List<Event> getAllEvents() {
-        return List.of();
+        return new ArrayList<>(storedEvents);
     }
 
     @Override
