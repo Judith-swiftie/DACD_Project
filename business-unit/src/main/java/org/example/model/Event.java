@@ -1,17 +1,12 @@
 package org.example.model;
 
+import com.google.gson.Gson;
 import java.util.List;
 
 public class Event {
-    private final String id;
-    private final String name;
-    private final List<Artist> artists;
-
-    public Event(String id, String name, List<Artist> artists) {
-        this.id = id;
-        this.name = name;
-        this.artists = artists;
-    }
+    private String id;
+    private String name;
+    private List<Artist> artists;
 
     public String getId() {
         return id;
@@ -24,5 +19,12 @@ public class Event {
     public List<Artist> getArtists() {
         return artists;
     }
-}
 
+    public String toJson() {
+        return new Gson().toJson(this);
+    }
+
+    public static Event fromJson(String json) {
+        return new Gson().fromJson(json, Event.class);
+    }
+}
