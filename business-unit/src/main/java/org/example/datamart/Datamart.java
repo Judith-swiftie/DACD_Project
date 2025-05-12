@@ -16,12 +16,18 @@ public class Datamart {
     private void initializeDatabase() {
         try (Connection conn = DriverManager.getConnection(DB_URL);
              Statement stmt = conn.createStatement()) {
-
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS events (
                     id TEXT PRIMARY KEY,
                     name TEXT NOT NULL,
                     json TEXT NOT NULL
+                );
+            """);
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS artists_tracks (
+                    artist_name TEXT NOT NULL,
+                    track_name TEXT NOT NULL,
+                    PRIMARY KEY (artist_name, track_name)
                 );
             """);
 
@@ -34,69 +40,93 @@ public class Datamart {
         String sql = "INSERT OR IGNORE INTO events(id, name, json) VALUES (?, ?, ?)";
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, event.getId());
             ps.setString(2, event.getName());
             ps.setString(3, event.toJson());
             ps.executeUpdate();
-
         } catch (SQLException e) {
             throw new RuntimeException("Error añadiendo evento al Datamart", e);
         }
     }
 
-    public List<Event> getAllEvents() {
-        String sql = "SELECT json FROM events";
-        List<Event> list = new ArrayList<>();
+    public void addArtistTracks(String artistName, List<String> tracks) {
+        String sql = "INSERT OR IGNORE INTO artists_tracks(artist_name, track_name) VALUES (?, ?)";
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                String json = rs.getString("json");
-                list.add(Event.fromJson(json));
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (String track : tracks) {
+                ps.setString(1, artistName);
+                ps.setString(2, track);
+                ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error leyendo eventos del Datamart", e);
+            throw new RuntimeException("Error añadiendo artista y canciones al Datamart", e);
         }
-        return list;
+    }
+
+    public List<String> getTracksByArtist(String artistName) {
+        String sql = "SELECT track_name FROM artists_tracks WHERE artist_name = ?";
+        List<String> tracks = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, artistName);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    tracks.add(rs.getString("track_name"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error obteniendo canciones del artista", e);
+        }
+        return tracks;
     }
 
     public List<Event> searchByName(String keyword) {
         String sql = "SELECT json FROM events WHERE name LIKE ?";
-        List<Event> list = new ArrayList<>();
+        List<Event> results = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, "%" + keyword + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    list.add(Event.fromJson(rs.getString("json")));
+                    results.add(Event.fromJson(rs.getString("json")));
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error buscando eventos por nombre", e);
         }
-        return list;
+        return results;
     }
 
     public List<Event> searchByArtist(String artistName) {
         String sql = "SELECT json FROM events";
-        List<Event> list = new ArrayList<>();
+        List<Event> result = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Event ev = Event.fromJson(rs.getString("json"));
-                if (ev.getArtists().stream()
-                        .anyMatch(a -> a.getName().equalsIgnoreCase(artistName))) {
-                    list.add(ev);
+                Event event = Event.fromJson(rs.getString("json"));
+                if (event.getArtists().stream().anyMatch(a -> a.getName().equalsIgnoreCase(artistName))) {
+                    result.add(event);
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error buscando eventos por artista", e);
         }
-        return list;
+        return result;
+    }
+
+    public List<Event> getAllEvents() {
+        String sql = "SELECT json FROM events";
+        List<Event> events = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                events.add(Event.fromJson(rs.getString("json")));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error cargando todos los eventos", e);
+        }
+        return events;
     }
 }

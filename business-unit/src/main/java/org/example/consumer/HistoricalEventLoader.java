@@ -2,11 +2,10 @@ package org.example.consumer;
 
 import org.example.model.Event;
 
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class HistoricalEventLoader {
 
@@ -18,20 +17,36 @@ public class HistoricalEventLoader {
 
     public List<Event> loadEvents() {
         List<Event> events = new ArrayList<>();
-        File[] files = new File(eventStorePath).listFiles((dir, name) -> name.endsWith(".events"));
+        Set<String> seenEventIds = new HashSet<>();
 
-        if (files != null) {
-            for (File file : files) {
-                try {
-                    String json = new String(Files.readAllBytes(file.toPath()));
-                    Event event = Event.fromJson(json); // Suponiendo que tengas un método de deserialización
-                    events.add(event);
-                } catch (IOException e) {
-                    System.err.println("Error leyendo el archivo de eventos: " + e.getMessage());
-                }
-            }
+        try {
+            long fileCount = Files.walk(Paths.get(eventStorePath))
+                    .filter(path -> path.toString().endsWith(".events"))
+                    .peek(file -> {
+                        try (BufferedReader reader = Files.newBufferedReader(file)) {
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                try {
+                                    Event event = Event.fromJson(line);
+                                    if (event.getId() != null && seenEventIds.add(event.getId())) {
+                                        events.add(event);
+                                    }
+                                } catch (Exception e) {
+                                    System.err.println("Error parseando evento: " + e.getMessage());
+                                }
+                            }
+                        } catch (IOException e) {
+                            System.err.println("Error leyendo archivo: " + file + " - " + e.getMessage());
+                        }
+                    })
+                    .count();
+
+            System.out.println("Archivos .events procesados: " + fileCount);
+        } catch (IOException e) {
+            System.err.println("Error accediendo a archivos de eventos: " + e.getMessage());
         }
+
+        System.out.println("Eventos únicos cargados: " + events.size());
         return events;
     }
 }
-

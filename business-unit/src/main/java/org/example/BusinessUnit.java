@@ -2,10 +2,12 @@ package org.example;
 
 import org.example.consumer.HistoricalEventLoader;
 import org.example.consumer.RealTimeEventConsumer;
+import org.example.consumer.SpotifyFeederLoader;
 import org.example.datamart.Datamart;
 import org.example.model.Event;
 
 import java.util.List;
+import java.util.Optional;
 
 public class BusinessUnit {
 
@@ -13,13 +15,16 @@ public class BusinessUnit {
     private final HistoricalEventLoader historicalEventLoader;
     private final PlaylistGenerator playlistGenerator;
     private final Datamart datamart;
+    private final EventSelector eventSelector;
+    private final SpotifyFeederLoader spotifyFeederLoader;
 
-    public BusinessUnit(String topicName, String eventStorePath) {
+    public BusinessUnit(String topicName, String eventStorePath, String spotifyFeederPath) {
         this.historicalEventLoader = new HistoricalEventLoader(eventStorePath);
-        this.playlistGenerator = new PlaylistGenerator();
         this.datamart = new Datamart();
-        this.eventConsumer = new RealTimeEventConsumer(topicName);
-
+        this.playlistGenerator = new PlaylistGenerator(datamart);
+        this.eventConsumer = new RealTimeEventConsumer(topicName, datamart);
+        this.eventSelector = new EventSelector(datamart);
+        this.spotifyFeederLoader = new SpotifyFeederLoader(spotifyFeederPath, datamart);
     }
 
     public void start() {
@@ -27,11 +32,31 @@ public class BusinessUnit {
     }
 
     public void loadHistoricalEvents() {
-        List<Event> historicalEvents = historicalEventLoader.loadEvents();
-        playlistGenerator.generatePlaylistsFromEvents(historicalEvents);
-        for (Event event : historicalEvents) {
-            datamart.addEvent(event);
+        List<Event> events = historicalEventLoader.loadEvents();
+        events.forEach(datamart::addEvent);
+    }
+
+    public void loadSpotifyData() {
+        spotifyFeederLoader.loadArtistTracks();
+    }
+
+    public void interactWithUser() {
+        loadHistoricalEvents();
+        Optional<Event> selectedEvent = eventSelector.selectEventFromUserInput();
+        if (selectedEvent.isEmpty()) {
+            System.out.println("No se seleccionó ningún evento.");
+            return;
         }
+
+        playlistGenerator.generatePlaylistForEvent(selectedEvent.get());
+    }
+
+    public List<Event> searchEventsByName(String keyword) {
+        return datamart.searchByName(keyword);
+    }
+
+    public List<Event> searchEventsByArtist(String artistName) {
+        return datamart.searchByArtist(artistName);
     }
 
     public void generatePlaylistForEvent(Event event) {

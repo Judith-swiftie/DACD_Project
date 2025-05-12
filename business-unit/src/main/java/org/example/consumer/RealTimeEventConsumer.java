@@ -3,6 +3,7 @@ package org.example.consumer;
 import jakarta.jms.*;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.example.PlaylistGenerator;
+import org.example.datamart.Datamart;
 import org.example.model.Event;
 
 public class RealTimeEventConsumer {
@@ -10,10 +11,12 @@ public class RealTimeEventConsumer {
     private static final String BROKER_URL = "tcp://localhost:61616";
     private final String topicName;
     private final PlaylistGenerator playlistGenerator;
+    private final Datamart datamart;
 
-    public RealTimeEventConsumer(String topicName) {
+    public RealTimeEventConsumer(String topicName, Datamart datamart) {
+        this.datamart = datamart;
         this.topicName = topicName;
-        this.playlistGenerator = new PlaylistGenerator();
+        this.playlistGenerator = new PlaylistGenerator(datamart);
     }
 
     public void startConsumingEvents() {
