@@ -17,7 +17,7 @@ public class HistoricalEventLoader {
 
     public List<Event> loadEvents() {
         List<Event> events = new ArrayList<>();
-        Set<String> seenEventIds = new HashSet<>();
+        Set<String> seenEventNames = new HashSet<>();
 
         try {
             long fileCount = Files.walk(Paths.get(eventStorePath))
@@ -28,7 +28,7 @@ public class HistoricalEventLoader {
                             while ((line = reader.readLine()) != null) {
                                 try {
                                     Event event = Event.fromJson(line);
-                                    if (event.getId() != null && seenEventIds.add(event.getId())) {
+                                    if (event.getName() != null && seenEventNames.add(event.getName())) {  // Verificamos por nombre
                                         events.add(event);
                                     }
                                 } catch (Exception e) {

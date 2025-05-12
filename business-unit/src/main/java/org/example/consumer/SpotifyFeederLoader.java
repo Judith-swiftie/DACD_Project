@@ -57,7 +57,5 @@ public class SpotifyFeederLoader {
         } catch (IOException e) {
             System.err.println("Error accediendo a archivos de SpotifyFeeder: " + e.getMessage());
         }
-
-        System.out.println("Artistas únicos cargados desde SpotifyFeeder.");
     }
 }

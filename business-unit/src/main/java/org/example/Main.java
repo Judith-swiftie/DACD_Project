@@ -12,45 +12,37 @@ public class Main {
         String eventStorePath = "eventstore/events/TicketmasterFeeder";
         String spotifyFeederPath = "eventstore/playlist/SpotifyFeeder";
         BusinessUnit unit = new BusinessUnit("events", eventStorePath, spotifyFeederPath);
+        unit.loadHistoricalEvents();
+        unit.loadSpotifyData();
 
         while (true) {
             System.out.println("\nMenú:");
-            System.out.println("1. Cargar eventos históricos");
-            System.out.println("2. Cargar datos de Spotify");
-            System.out.println("3. Buscar eventos por nombre");
-            System.out.println("4. Buscar eventos por artista");
-            System.out.println("5. Generar lista de reproducción desde todos los eventos");
-            System.out.println("6. Salir");
+            System.out.println("1. Buscar eventos por nombre");
+            System.out.println("2. Buscar eventos por artista");
+            System.out.println("3. Generar lista de reproducción desde todos los eventos");
+            System.out.println("4. Salir");
 
             System.out.print("Elige una opción: ");
             int choice = scanner.nextInt();
-            scanner.nextLine();  // Limpiar el buffer
+            scanner.nextLine();
 
             switch (choice) {
                 case 1:
-                    System.out.println("Cargando eventos históricos...");
-                    unit.loadHistoricalEvents();
-                    break;
-                case 2:
-                    System.out.println("Cargando datos de Spotify...");
-                    unit.loadSpotifyData();
-                    break;
-                case 3:
                     System.out.print("Introduce el nombre del evento: ");
                     String eventName = scanner.nextLine();
                     List<Event> eventsByName = unit.searchEventsByName(eventName);
                     handleEventSelection(eventsByName, unit, scanner);
                     break;
-                case 4:
+                case 2:
                     System.out.print("Introduce el nombre del artista: ");
                     String artistName = scanner.nextLine();
                     List<Event> eventsByArtist = unit.searchEventsByArtist(artistName);
                     handleEventSelection(eventsByArtist, unit, scanner);
                     break;
-                case 5:
+                case 3:
                     unit.interactWithUser();
                     break;
-                case 6:
+                case 4:
                     System.out.println("Saliendo...");
                     return;
                 default:

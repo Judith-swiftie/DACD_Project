@@ -37,17 +37,22 @@ public class Datamart {
     }
 
     public void addEvent(Event event) {
-        String sql = "INSERT OR IGNORE INTO events(id, name, json) VALUES (?, ?, ?)";
+        String sql = "INSERT OR IGNORE INTO events(name, json) VALUES (?, ?)";
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, event.getId());
-            ps.setString(2, event.getName());
-            ps.setString(3, event.toJson());
-            ps.executeUpdate();
+            ps.setString(1, event.getName());  // Usamos el nombre en lugar del id
+            ps.setString(2, event.toJson());
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Evento añadido correctamente: " + event.getName());
+            } else {
+                System.out.println("Evento ya existente o no insertado: " + event.getName());
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Error añadiendo evento al Datamart", e);
         }
     }
+
 
     public void addArtistTracks(String artistName, List<String> tracks) {
         String sql = "INSERT OR IGNORE INTO artists_tracks(artist_name, track_name) VALUES (?, ?)";
