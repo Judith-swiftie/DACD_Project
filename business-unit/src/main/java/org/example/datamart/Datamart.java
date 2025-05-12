@@ -43,11 +43,6 @@ public class Datamart {
             ps.setString(1, event.getName());  // Usamos el nombre en lugar del id
             ps.setString(2, event.toJson());
             int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Evento añadido correctamente: " + event.getName());
-            } else {
-                System.out.println("Evento ya existente o no insertado: " + event.getName());
-            }
         } catch (SQLException e) {
             throw new RuntimeException("Error añadiendo evento al Datamart", e);
         }
