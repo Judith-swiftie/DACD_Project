@@ -12,7 +12,7 @@
         <module>ticketmaster-feeder</module>
         <module>spotify-feeder</module>
         <module>event-store-builder</module>
-        <module>business-unit</module>
+        <module>playlists-for-events</module>
     </modules>
 
     <properties>
