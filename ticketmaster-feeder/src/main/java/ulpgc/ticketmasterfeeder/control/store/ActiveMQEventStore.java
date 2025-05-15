@@ -11,13 +11,11 @@ import java.time.Instant;
 
 public class ActiveMQEventStore implements EventStore {
     private final List<Event> storedEvents = new ArrayList<>();
-    private final String url;
     private final String sourceName = "TicketmasterFeeder";
     private final ConnectionFactory connectionFactory;
     private final Gson gson = new Gson();
 
     public ActiveMQEventStore(String url) {
-        this.url = url;
         this.connectionFactory = new ActiveMQConnectionFactory(url);
     }
 
@@ -28,7 +26,7 @@ public class ActiveMQEventStore implements EventStore {
             connection.start();
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             for (Event event : events) {
-                Topic topic = session.createTopic(getTopicForEvent(event));
+                Topic topic = session.createTopic(getTopicForEvent());
                 MessageProducer producer = session.createProducer(topic);
                 String json = wrapEventAsJson(event);
                 TextMessage message = session.createTextMessage(json);
@@ -56,7 +54,7 @@ public class ActiveMQEventStore implements EventStore {
         return gson.toJson(map);
     }
 
-    private String getTopicForEvent(Event event) {
+    private String getTopicForEvent() {
         return "events";
     }
 

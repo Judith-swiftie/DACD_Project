@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Datamart {
-    private static final String DB_URL = "jdbc:sqlite:businessunit.db";
+    private static final String DB_URL = System.getenv("DB_URL");
 
     public Datamart() {
         initializeDatabase();

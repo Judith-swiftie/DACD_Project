@@ -8,8 +8,8 @@ import java.util.Base64;
 import org.json.JSONObject;
 
 public class SpotifyAuth {
-    private static final String CLIENT_ID = "24674071b03846a48e871b35ba81a2e3";
-    private static final String CLIENT_SECRET = "be1fb7a166b949aab0ed22276215bc30";
+    private static final String CLIENT_ID = System.getenv("CLIENT_ID");
+    private static final String CLIENT_SECRET = System.getenv("CLIENT_SECRET");
     private static final String TOKEN_URL = "https://accounts.spotify.com/api/token";
 
     public static String getAccessToken() throws Exception {

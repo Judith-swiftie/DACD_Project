@@ -8,7 +8,6 @@ import ulpgc.ticketmasterfeeder.model.Event;
 import java.util.List;
 
 public class Controller {
-    private static final String BROKER_URL = "tcp://localhost:61616";
     private final ActiveMQEventStore eventStore;
     private final TicketMasterEventProvider eventProvider;
 
