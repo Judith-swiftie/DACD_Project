@@ -27,7 +27,7 @@ public class EventStoreBuilder {
             consumer.setMessageListener(this::handleMessage);
             System.out.println("Esperando eventos en el topic: " + topicName);
         } catch (JMSException e) {
-            System.err.println("---Error de conexión con el broker: " + e.getMessage());
+            System.err.println("Error de conexión con el broker: " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
 import com.google.gson.Gson;
-
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -37,14 +36,18 @@ public class FileJsonEventStore implements JsonEventStore {
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         Path topicDir = BASE_DIRECTORY.resolve(topicName);
         Path ssDir = topicDir.resolve(ss);
-        if (!Files.exists(ssDir)) {
+        ensureDirectoryExists(ssDir);
+        return ssDir.resolve(dateStr + ".events");
+    }
+
+    private void ensureDirectoryExists(Path directory) {
+        if (!Files.exists(directory)) {
             try {
-                Files.createDirectories(ssDir);
+                Files.createDirectories(directory);
             } catch (IOException e) {
-                throw new UncheckedIOException("No se pudo crear el directorio: " + ssDir, e);
+                throw new UncheckedIOException("No se pudo crear el directorio: " + directory, e);
             }
         }
-        return ssDir.resolve(dateStr + ".events");
     }
 
     private void writeJsonToFile(Path filePath, String json) throws IOException {
