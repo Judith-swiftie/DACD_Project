@@ -17,8 +17,7 @@ public class Datamart {
              Statement stmt = conn.createStatement()) {
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS events (
-                    id TEXT PRIMARY KEY,
-                    name TEXT NOT NULL,
+                    name TEXT PRIMARY KEY,
                     json TEXT NOT NULL
                 );
             """);
@@ -39,7 +38,7 @@ public class Datamart {
         String sql = "INSERT OR IGNORE INTO events(name, json) VALUES (?, ?)";
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, event.getName());  // Usamos el nombre en lugar del id
+            ps.setString(1, event.getName());
             ps.setString(2, event.toJson());
             int rowsAffected = ps.executeUpdate();
         } catch (SQLException e) {
