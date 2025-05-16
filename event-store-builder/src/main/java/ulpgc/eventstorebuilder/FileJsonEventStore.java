@@ -1,57 +1,29 @@
 package ulpgc.eventstorebuilder;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.*;
-import com.google.gson.Gson;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
+import java.nio.file.Path;
 
 public class FileJsonEventStore implements JsonEventStore {
-    private static final Path BASE_DIRECTORY = Paths.get("eventstore");
     private final String topicName;
-    private final Gson gson = new Gson();
+    private final JsonEventPathBuilder pathBuilder;
+    private final FileWriter fileWriter;
 
-    public FileJsonEventStore(String topicName) {
+    public FileJsonEventStore(String topicName,
+                              JsonEventPathBuilder pathBuilder,
+                              FileWriter fileWriter) {
         this.topicName = topicName;
-        System.out.println("topicName: " + topicName);
+        this.pathBuilder = pathBuilder;
+        this.fileWriter = fileWriter;
     }
 
     @Override
     public void saveJson(String json) {
         try {
-            Path filePath = buildFilePathFromJson(json);
-            writeJsonToFile(filePath, json);
+            Path filePath = pathBuilder.buildPath(topicName, json);
+            fileWriter.append(filePath, json);
             System.out.println("JSON guardado en: " + filePath);
         } catch (IOException e) {
             System.err.println("---Error al guardar JSON: " + e.getMessage());
         }
-    }
-
-    private Path buildFilePathFromJson(String json) {
-        Map<String, Object> eventMap = gson.fromJson(json, Map.class);
-        String ss = (String) eventMap.get("ss");
-        String dateStr = ZonedDateTime.parse((String) eventMap.get("ts"))
-                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        Path topicDir = BASE_DIRECTORY.resolve(topicName);
-        Path ssDir = topicDir.resolve(ss);
-        ensureDirectoryExists(ssDir);
-        return ssDir.resolve(dateStr + ".events");
-    }
-
-    private void ensureDirectoryExists(Path directory) {
-        if (!Files.exists(directory)) {
-            try {
-                Files.createDirectories(directory);
-            } catch (IOException e) {
-                throw new UncheckedIOException("No se pudo crear el directorio: " + directory, e);
-            }
-        }
-    }
-
-    private void writeJsonToFile(Path filePath, String json) throws IOException {
-        Files.writeString(filePath, json + System.lineSeparator(),
-                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 }
