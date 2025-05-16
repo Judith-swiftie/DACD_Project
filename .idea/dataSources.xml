@@ -19,7 +19,7 @@
         </library>
       </libraries>
     </data-source>
-    <data-source source="LOCAL" name="businessunit" uuid="6aec62ea-21b0-45dc-bc0d-4203cb7d36be">
+    <data-source source="LOCAL" name="businessunit" uuid="b39d6ba7-6316-47e7-997b-21d9054b57ae">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>

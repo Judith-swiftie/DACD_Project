@@ -1,18 +1,23 @@
 package ulpgc.playlistsforevents.control.consumers;
 
-import javax.jms.*;
-import org.apache.activemq.ActiveMQConnectionFactory;
-import ulpgc.playlistsforevents.control.store.Datamart;
-import ulpgc.playlistsforevents.model.Event;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
 
 public class RealTimeEventConsumer {
-    private static final String BROKER_URL = "tcp://localhost:61616";
+    private final ConnectionFactory connectionFactory;
     private final String topicName;
-    private final Datamart datamart;
+    private final EventProcessor eventProcessor;
 
-    public RealTimeEventConsumer(String topicName, Datamart datamart) {
-        this.datamart = datamart;
+    public RealTimeEventConsumer(ConnectionFactory connectionFactory, String topicName, EventProcessor eventProcessor) {
+        this.connectionFactory = connectionFactory;
         this.topicName = topicName;
+        this.eventProcessor = eventProcessor;
     }
 
     public void startConsumingEvents() {
@@ -23,13 +28,13 @@ public class RealTimeEventConsumer {
             MessageConsumer consumer = createConsumer(session, topic);
             consumer.setMessageListener(this::handleMessage);
         } catch (JMSException e) {
-            handleConnectionError(e);
+            System.err.println("Error al conectar con el broker: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private Connection createAndStartConnection() throws JMSException {
-        ConnectionFactory factory = new ActiveMQConnectionFactory(BROKER_URL);
-        Connection connection = factory.createConnection();
+        Connection connection = connectionFactory.createConnection();
         connection.start();
         return connection;
     }
@@ -46,22 +51,16 @@ public class RealTimeEventConsumer {
         return session.createConsumer(topic);
     }
 
-    private void handleConnectionError(JMSException e) {
-        System.err.println("Error al conectar con el broker: " + e.getMessage());
-        e.printStackTrace();
-    }
-
     private void handleMessage(Message message) {
         if (message instanceof TextMessage textMessage) {
             try {
                 String json = textMessage.getText();
-                Event event = Event.fromJson(json);
-                datamart.addEvent(event);
+                eventProcessor.process(json);
             } catch (JMSException e) {
                 System.err.println("Error al procesar el mensaje JMS: " + e.getMessage());
-            } catch (Exception e) {
-                System.err.println("Error al convertir el mensaje a evento: " + e.getMessage());
             }
+        } else {
+            System.err.println("Mensaje recibido no es TextMessage");
         }
     }
 }

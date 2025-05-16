@@ -8,9 +8,11 @@ import java.util.*;
 
 public class HistoricalEventLoader {
     private final String eventStorePath;
+    private final EventParser parser;
 
-    public HistoricalEventLoader(String eventStorePath) {
+    public HistoricalEventLoader(String eventStorePath, EventParser parser) {
         this.eventStorePath = eventStorePath;
+        this.parser = parser;
     }
 
     public List<Event> loadEvents() {
@@ -20,7 +22,9 @@ public class HistoricalEventLoader {
         for (Path file : eventFiles) {
             List<Event> fileEvents = readEventsFromFile(file);
             for (Event event : fileEvents) {
-                if (event.getName() != null && seenEventNames.add(event.getName())) {events.add(event);}
+                if (event.getName() != null && seenEventNames.add(event.getName())) {
+                    events.add(event);
+                }
             }
         }
         return events;
@@ -42,20 +46,11 @@ public class HistoricalEventLoader {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             String line;
             while ((line = reader.readLine()) != null) {
-                parseEvent(line).ifPresent(events::add);
+                parser.parse(line).ifPresent(events::add);
             }
         } catch (IOException e) {
             System.err.println("Error leyendo archivo: " + file + " - " + e.getMessage());
         }
         return events;
-    }
-
-    private Optional<Event> parseEvent(String jsonLine) {
-        try {
-            return Optional.ofNullable(Event.fromJson(jsonLine));
-        } catch (Exception e) {
-            System.err.println("Error parseando evento: " + e.getMessage());
-            return Optional.empty();
-        }
     }
 }

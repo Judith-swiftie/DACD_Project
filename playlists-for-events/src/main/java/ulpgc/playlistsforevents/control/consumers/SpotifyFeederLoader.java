@@ -1,69 +1,65 @@
 package ulpgc.playlistsforevents.control.consumers;
 
 import ulpgc.playlistsforevents.control.store.Datamart;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class SpotifyFeederLoader {
+public class SpotifyFeederLoader implements FeederLoader {
     private final String spotifyFeederPath;
     private final Datamart datamart;
+    private final FileReaderService fileReaderService;
+    private final SpotifyJsonParser parser;
 
-    public SpotifyFeederLoader(String spotifyFeederPath, Datamart datamart) {
+    public SpotifyFeederLoader(String spotifyFeederPath, Datamart datamart,
+                               FileReaderService fileReaderService, SpotifyJsonParser parser) {
         this.spotifyFeederPath = spotifyFeederPath;
         this.datamart = datamart;
+        this.fileReaderService = fileReaderService;
+        this.parser = parser;
     }
 
-    public void loadArtistTracks() {
+    @Override
+    public void load() {
         Set<String> seenArtists = new HashSet<>();
-        List<Path> eventFiles = getEventFiles();
-        for (Path file : eventFiles) {processEventFile(file, seenArtists);}
-    }
-
-    private List<Path> getEventFiles() {
+        List<Path> eventFiles;
         try {
-            return Files.walk(Paths.get(spotifyFeederPath))
-                    .filter(path -> path.toString().endsWith(".events"))
-                    .toList();
+            eventFiles = fileReaderService.listFiles(spotifyFeederPath, ".events");
         } catch (IOException e) {
             System.err.println("Error accediendo a archivos de SpotifyFeeder: " + e.getMessage());
-            return Collections.emptyList();
+            return;
+        }
+
+        for (Path file : eventFiles) {
+            processEventFile(file, seenArtists);
         }
     }
 
     private void processEventFile(Path file, Set<String> seenArtists) {
-        try (BufferedReader reader = Files.newBufferedReader(file)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                processLine(line, seenArtists);
-            }
+        List<String> lines;
+        try {
+            lines = fileReaderService.readLines(file);
         } catch (IOException e) {
             System.err.println("Error leyendo archivo SpotifyFeeder: " + file + " - " + e.getMessage());
+            return;
+        }
+
+        for (String line : lines) {
+            processLine(line, seenArtists);
         }
     }
 
     private void processLine(String line, Set<String> seenArtists) {
         try {
-            JSONObject node = new JSONObject(line);
-            String artistName = node.getString("artistName");
+            String artistName = parser.parseArtistName(line);
             if (seenArtists.add(artistName)) {
-                List<String> tracks = extractTracks(node);
+                List<String> tracks = parser.parseTracks(line);
                 datamart.addArtistTracks(artistName, tracks);
             }
         } catch (Exception e) {
             System.err.println("Error parseando línea de SpotifyFeeder: " + e.getMessage());
         }
-    }
-
-    private List<String> extractTracks(JSONObject node) {
-        List<String> tracks = new ArrayList<>();
-        JSONArray trackArray = node.getJSONArray("tracks");
-        for (int i = 0; i < trackArray.length(); i++) {
-            tracks.add(trackArray.getString(i));
-        }
-        return tracks;
     }
 }

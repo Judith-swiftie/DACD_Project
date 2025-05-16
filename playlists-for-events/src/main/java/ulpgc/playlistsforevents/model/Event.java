@@ -4,12 +4,12 @@ import com.google.gson.Gson;
 import java.util.List;
 
 public class Event {
-    private String id;
-    private String name;
-    private List<Artist> artists;
+    private final String name;
+    private final List<Artist> artists;
 
-    public String getId() {
-        return id;
+    public Event(String name, List<Artist> artists) {
+        this.name = name;
+        this.artists = artists;
     }
 
     public String getName() {

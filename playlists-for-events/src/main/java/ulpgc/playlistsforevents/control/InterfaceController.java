@@ -4,11 +4,11 @@ import ulpgc.playlistsforevents.model.Event;
 import java.util.List;
 import java.util.Scanner;
 
-public class Controller2 {
+public class InterfaceController {
     private final Controller controller;
     private final Scanner scanner;
 
-    public Controller2(Controller controller) {
+    public InterfaceController(Controller controller) {
         this.controller = controller;
         this.scanner = new Scanner(System.in);
     }

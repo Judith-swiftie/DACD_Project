@@ -41,7 +41,7 @@ public class Controller {
     }
 
     public void loadSpotifyData() {
-        spotifyFeederLoader.loadArtistTracks();
+        spotifyFeederLoader.load();
     }
 
     public void interactWithUser() {

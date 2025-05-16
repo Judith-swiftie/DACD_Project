@@ -1,16 +1,13 @@
 package ulpgc.playlistsforevents.model;
 
-import java.util.List;
-
 public class Artist {
-    private String name;
-    private List<String> tracks;
+    private final String name;
+
+    public Artist(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
-    }
-
-    public List<String> getTracks() {
-        return tracks;
     }
 }
