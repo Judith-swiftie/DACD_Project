@@ -3,14 +3,14 @@ package ulpgc.ticketmasterfeeder.model;
 import java.util.List;
 
 public class Event {
-    private String name;
-    private String date;
-    private String time;
-    private String venue;
-    private String city;
-    private String country;
-    private List<Artist> artists;
-    private String priceInfo;
+    private final String name;
+    private final String date;
+    private final String time;
+    private final String venue;
+    private final String city;
+    private final String country;
+    private final List<Artist> artists;
+    private final String priceInfo;
 
     public Event(String name, String date, String time, String venue, String city, String country, List<Artist> artists, String priceInfo) {
         this.name = name;
@@ -63,7 +63,7 @@ public class Event {
                 "Lugar: " + venue + "\n" +
                 "Ciudad: " + city + "\n" +
                 "País: " + country + "\n" +
-                "Artistas: " + (artistsInfo.length() > 0 ? artistsInfo : "No disponible") + "\n" +
+                "Artistas: " + (!artistsInfo.isEmpty() ? artistsInfo : "No disponible") + "\n" +
                 "Precios: " + priceInfo;
     }
 }

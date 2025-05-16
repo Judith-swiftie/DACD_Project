@@ -2,6 +2,8 @@ package ulpgc.eventstorebuilder;
 
 import jakarta.jms.*;
 
+import java.io.IOException;
+
 public class EventStoreBuilder {
     private final String topicName;
     private final String clientId;
@@ -18,15 +20,18 @@ public class EventStoreBuilder {
     public void startEventStore() {
         try {
             Connection connection = connectionManager.createConnection(clientId);
-            connection.start();
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Topic topic = session.createTopic(topicName);
             MessageConsumer consumer = session.createDurableSubscriber(topic, clientId);
             consumer.setMessageListener(messageProcessor::process);
+            connection.start();
             System.out.println("Esperando eventos en el topic: " + topicName);
+            System.in.read();
         } catch (JMSException e) {
             System.err.println("Error de conexión con el broker: " + e.getMessage());
             e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -23,11 +23,11 @@ public class ActiveMQEventStore implements EventStore {
     public void saveEvents(List<Event> events) {
         storedEvents.addAll(events);
         try (Connection connection = connectionFactory.createConnection()) {
-            connection.start();
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic = session.createTopic(getTopicForEvent());
+            MessageProducer producer = session.createProducer(topic);
+            connection.start();
             for (Event event : events) {
-                Topic topic = session.createTopic(getTopicForEvent());
-                MessageProducer producer = session.createProducer(topic);
                 String json = wrapEventAsJson(event);
                 TextMessage message = session.createTextMessage(json);
                 producer.send(message);
