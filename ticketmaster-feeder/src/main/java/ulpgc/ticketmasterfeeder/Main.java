@@ -1,11 +1,11 @@
 package ulpgc.ticketmasterfeeder;
 
-import ulpgc.ticketmasterfeeder.control.ArtistFileExporter;
-import ulpgc.ticketmasterfeeder.control.Controller;
-import ulpgc.ticketmasterfeeder.control.provider.TicketMasterClient;
-import ulpgc.ticketmasterfeeder.control.provider.TicketMasterEventParser;
-import ulpgc.ticketmasterfeeder.control.provider.TicketMasterEventProvider;
-import ulpgc.ticketmasterfeeder.control.store.ActiveMQEventStore;
+import ulpgc.ticketmasterfeeder.control.adapter.service.ArtistFileExporter;
+import ulpgc.ticketmasterfeeder.control.adapter.service.Controller;
+import ulpgc.ticketmasterfeeder.control.adapter.provider.TicketMasterClient;
+import ulpgc.ticketmasterfeeder.control.adapter.provider.TicketMasterEventParser;
+import ulpgc.ticketmasterfeeder.control.adapter.provider.TicketMasterEventProvider;
+import ulpgc.ticketmasterfeeder.control.adapter.store.ActiveMQEventStore;
 import ulpgc.ticketmasterfeeder.model.Event;
 import java.net.http.HttpClient;
 import com.fasterxml.jackson.databind.ObjectMapper;

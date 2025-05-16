@@ -1,11 +1,13 @@
 package ulpgc.playlistsforevents;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import ulpgc.playlistsforevents.control.*;
-import ulpgc.playlistsforevents.control.consumers.*;
-import ulpgc.playlistsforevents.control.consumers.EventParser;
-import ulpgc.playlistsforevents.control.consumers.JsonEventParser;
-import ulpgc.playlistsforevents.control.store.*;
+import ulpgc.playlistsforevents.control.adapter.consumer.*;
+import ulpgc.playlistsforevents.control.port.ConnectionProvider;
+import ulpgc.playlistsforevents.control.adapter.store.Datamart;
+import ulpgc.playlistsforevents.control.port.EventParser;
+import ulpgc.playlistsforevents.control.port.EventProcessor;
+import ulpgc.playlistsforevents.control.service.*;
+
 import javax.jms.ConnectionFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;

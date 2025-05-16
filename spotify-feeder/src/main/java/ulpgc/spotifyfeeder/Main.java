@@ -1,8 +1,11 @@
 package ulpgc.spotifyfeeder;
 
-import ulpgc.spotifyfeeder.control.Controller;
-import ulpgc.spotifyfeeder.control.provider.*;
-import ulpgc.spotifyfeeder.control.store.*;
+import ulpgc.spotifyfeeder.control.adapter.Controller;
+import ulpgc.spotifyfeeder.control.adapter.provider.SpotifyArtistService;
+import ulpgc.spotifyfeeder.control.adapter.provider.SpotifyAuth;
+import ulpgc.spotifyfeeder.control.adapter.provider.SpotifyClient;
+import ulpgc.spotifyfeeder.control.adapter.store.ActiveMQMusicStore;
+import ulpgc.spotifyfeeder.control.port.MusicStore;
 import java.net.http.HttpClient;
 import java.io.BufferedReader;
 import java.io.FileReader;

@@ -1,6 +1,7 @@
 package ulpgc.spotifyfeeder.control.provider;
 
 import org.junit.jupiter.api.Test;
+import ulpgc.spotifyfeeder.control.adapter.provider.SpotifyAuth;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -2,6 +2,7 @@ package ulpgc.spotifyfeeder.control.store;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ulpgc.spotifyfeeder.control.adapter.store.SqliteMusicStore;
 
 import java.util.List;
 
