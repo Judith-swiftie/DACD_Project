@@ -1,8 +1,8 @@
 package ulpgc.spotifyfeeder.model;
 
 public class Artist {
-    private String id;
-    private String name;
+    private final String id;
+    private final String name;
 
     public Artist(String id, String name) {
         this.id = id;

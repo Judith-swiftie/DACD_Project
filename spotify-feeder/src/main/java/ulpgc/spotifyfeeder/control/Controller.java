@@ -1,27 +1,25 @@
 package ulpgc.spotifyfeeder.control;
 
-import ulpgc.spotifyfeeder.control.provider.SpotifyArtistService;
-import ulpgc.spotifyfeeder.control.store.ActiveMQMusicStore;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.ArrayList;
+import ulpgc.spotifyfeeder.control.store.MusicStore;
+import ulpgc.spotifyfeeder.control.provider.ArtistFinder;
+import ulpgc.spotifyfeeder.control.provider.TrackProvider;
 import java.util.List;
 import org.json.JSONObject;
 
 public class Controller {
-    private static final String BROKER_URL = "tcp://localhost:61616";
-    private final ActiveMQMusicStore musicStore;
-    private final SpotifyArtistService musicProvider;
-    private final String artistFilePath;
+    private final MusicStore musicStore;
+    private final ArtistFinder artistFinder;
+    private final TrackProvider trackProvider;
+    private final List<String> artistNames;
 
-    public Controller(SpotifyArtistService musicProvider, String artistFilePath) {
-        this.musicProvider = musicProvider;
-        this.artistFilePath = artistFilePath;
-        this.musicStore = new ActiveMQMusicStore(BROKER_URL, musicProvider);
+    public Controller(MusicStore musicStore, ArtistFinder artistFinder, TrackProvider trackProvider, List<String> artistNames) {
+        this.musicStore = musicStore;
+        this.artistFinder = artistFinder;
+        this.trackProvider = trackProvider;
+        this.artistNames = artistNames;
     }
 
     public void fetchAndSendEvents() {
-        List<String> artistNames = readArtistFile();
         for (String artistName : artistNames) {
             processArtist(artistName);
         }
@@ -29,37 +27,27 @@ public class Controller {
 
     private void processArtist(String artistName) {
         try {
-            JSONObject artist = musicProvider.findArtistByName(artistName);
+            JSONObject artist = artistFinder.findArtistByName(artistName);
             if (artist == null) {
                 System.out.println("No se encontró el artista: " + artistName);
                 return;
             }
-            List<String> tracks = musicStore.getTracksByArtistId(artist.getString("id"));
+
+            List<String> tracks = trackProvider.getTopTracksByCountry(artist.getString("id"), "ES");
             if (tracks.isEmpty()) {
                 System.out.println("No se encontraron canciones populares para el artista: " + artistName);
                 return;
             }
-            musicStore.store(artist.getString("id"), artist.getString("name"), tracks);
+
+            if (musicStore.hasTracksChanged(artist.getString("id"), tracks)) {
+                musicStore.store(artist.getString("id"), artist.getString("name"), tracks);
+            } else {
+                System.out.println("No hay cambios en las canciones para: " + artistName);
+            }
+
         } catch (Exception e) {
-            System.err.println("---Error procesando artista '" + artistName + "': " + e.getMessage());
+            System.err.println("--- Error procesando artista '" + artistName + "': " + e.getMessage());
             e.printStackTrace();
         }
     }
-
-    private List<String> readArtistFile() {
-        List<String> artists = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(artistFilePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
-                    artists.add(line.trim());
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error leyendo archivo de artistas: " + e.getMessage());
-        }
-        return artists;
-    }
-
 }
-

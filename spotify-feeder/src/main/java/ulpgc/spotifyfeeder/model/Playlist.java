@@ -3,8 +3,8 @@ package ulpgc.spotifyfeeder.model;
 import java.util.List;
 
 public class Playlist {
-    private String name;
-    private List<Track> tracks;
+    private final String name;
+    private final List<Track> tracks;
 
     public Playlist(String name, List<Track> tracks) {
         this.name = name;

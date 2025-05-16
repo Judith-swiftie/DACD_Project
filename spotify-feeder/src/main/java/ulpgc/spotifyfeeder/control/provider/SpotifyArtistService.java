@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpotifyArtistService implements ServiceStore {
+public class SpotifyArtistService implements ArtistFinder, TrackProvider {
     private static final String SEARCH_URL = "https://api.spotify.com/v1/search?q=%s&type=artist";
     private static final String TOP_TRACKS_URL = "https://api.spotify.com/v1/artists/%s/top-tracks?market=%s";
     private final SpotifyClient client;
@@ -43,7 +43,6 @@ public class SpotifyArtistService implements ServiceStore {
         }
         return artist;
     }
-
 
     @Override
     public List<String> getTopTracksByCountry(String artistId, String countryCode) throws Exception {

@@ -3,22 +3,18 @@ package ulpgc.spotifyfeeder.control.store;
 import com.google.gson.Gson;
 import jakarta.jms.*;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import ulpgc.spotifyfeeder.control.provider.SpotifyArtistService;
+import ulpgc.spotifyfeeder.control.provider.TrackProvider;
 import java.util.List;
 import java.util.Map;
 import java.time.Instant;
 
 public class ActiveMQMusicStore implements MusicStore {
-    private final String url;
-    private final String sourceName = "SpotifyFeeder";
     private final ConnectionFactory connectionFactory;
     private final Gson gson = new Gson();
-    private final SpotifyArtistService spotifyArtistService;
+    private final TrackProvider trackProvider = (artistId, countryCode) -> List.of();
 
-    public ActiveMQMusicStore(String url, SpotifyArtistService spotifyArtistService) {
-        this.url = url;
+    public ActiveMQMusicStore(String url) {
         this.connectionFactory = new ActiveMQConnectionFactory(url);
-        this.spotifyArtistService = spotifyArtistService;
     }
 
     @Override
@@ -26,7 +22,7 @@ public class ActiveMQMusicStore implements MusicStore {
         try (Connection connection = createConnection()) {
             connection.start();
             try (Session session = createSession(connection)) {
-                Topic topic = createTopic(session, getTopicForArtist(artistName));
+                Topic topic = createTopic(session, getTopicForArtist());
                 sendTrackMessage(session, topic, artistId, artistName, tracks);
             }
         } catch (JMSException e) {
@@ -56,6 +52,7 @@ public class ActiveMQMusicStore implements MusicStore {
     }
 
     private String wrapArtistAsJson(String artistId, String artistName, List<String> tracks) {
+        String sourceName = "SpotifyFeeder";
         Map<String, Object> map = Map.of(
                 "ts", Instant.now().toString(),
                 "ss", sourceName,
@@ -66,14 +63,14 @@ public class ActiveMQMusicStore implements MusicStore {
         return gson.toJson(map);
     }
 
-    private String getTopicForArtist(String artistName) {
+    private String getTopicForArtist() {
         return "playlist";
     }
 
     @Override
     public List<String> getTracksByArtistId(String artistId) {
         try {
-            return spotifyArtistService.getTopTracksByCountry(artistId, "ES");
+            return trackProvider.getTopTracksByCountry(artistId, "ES");
         } catch (Exception e) {
             System.err.println("---Error al obtener canciones de Spotify: " + e.getMessage());
             return List.of();
@@ -85,4 +82,5 @@ public class ActiveMQMusicStore implements MusicStore {
         List<String> currentTracks = getTracksByArtistId(artistId);
         return !currentTracks.equals(newTracks);
     }
+
 }

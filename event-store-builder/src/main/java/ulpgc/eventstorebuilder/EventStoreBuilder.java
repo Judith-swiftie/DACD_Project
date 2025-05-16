@@ -18,6 +18,7 @@ public class EventStoreBuilder {
     public void startEventStore() {
         try {
             Connection connection = connectionManager.createConnection(clientId);
+            connection.start();
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Topic topic = session.createTopic(topicName);
             MessageConsumer consumer = session.createDurableSubscriber(topic, clientId);

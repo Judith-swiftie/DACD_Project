@@ -1,9 +1,9 @@
 package ulpgc.spotifyfeeder.model;
 
 public class Track {
-    private String id;
-    private String name;
-    private Artist artist;
+    private final String id;
+    private final String name;
+    private final Artist artist;
 
     public Track(String id, String name, Artist artist) {
         this.id = id;
