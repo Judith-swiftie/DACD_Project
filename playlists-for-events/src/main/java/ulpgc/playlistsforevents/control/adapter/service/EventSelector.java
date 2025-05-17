@@ -1,4 +1,4 @@
-package ulpgc.playlistsforevents.control.service;
+package ulpgc.playlistsforevents.control.adapter.service;
 
 import ulpgc.playlistsforevents.control.adapter.store.Datamart;
 import ulpgc.playlistsforevents.model.Event;

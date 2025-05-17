@@ -1,4 +1,4 @@
-package ulpgc.playlistsforevents.control.service;
+package ulpgc.playlistsforevents.control.adapter.service;
 
 import ulpgc.playlistsforevents.control.port.TrackProvider;
 import ulpgc.playlistsforevents.model.Artist;

@@ -1,7 +1,7 @@
-package ulpgc.eventstorebuilder.control;
+package ulpgc.eventstorebuilder.control.adapter.service;
 
 import jakarta.jms.*;
-import ulpgc.eventstorebuilder.port.MessageProcessor;
+import ulpgc.eventstorebuilder.control.port.MessageProcessor;
 
 import java.io.IOException;
 

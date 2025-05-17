@@ -1,7 +1,7 @@
-package ulpgc.eventstorebuilder.store;
+package ulpgc.eventstorebuilder.control.adapter.store;
 
 import com.google.gson.Gson;
-import ulpgc.eventstorebuilder.port.JsonEventPathBuilder;
+import ulpgc.eventstorebuilder.control.port.JsonEventPathBuilder;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

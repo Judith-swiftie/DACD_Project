@@ -1,4 +1,4 @@
-package ulpgc.eventstorebuilder.control;
+package ulpgc.eventstorebuilder.control.adapter.service;
 
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;

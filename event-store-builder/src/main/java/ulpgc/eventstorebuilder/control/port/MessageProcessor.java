@@ -1,4 +1,4 @@
-package ulpgc.eventstorebuilder.port;
+package ulpgc.eventstorebuilder.control.port;
 
 import jakarta.jms.Message;
 

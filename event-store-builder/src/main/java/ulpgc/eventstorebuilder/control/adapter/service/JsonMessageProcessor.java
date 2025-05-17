@@ -1,10 +1,10 @@
-package ulpgc.eventstorebuilder.control;
+package ulpgc.eventstorebuilder.control.adapter.service;
 
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.TextMessage;
-import ulpgc.eventstorebuilder.port.JsonEventStore;
-import ulpgc.eventstorebuilder.port.MessageProcessor;
+import ulpgc.eventstorebuilder.control.port.JsonEventStore;
+import ulpgc.eventstorebuilder.control.port.MessageProcessor;
 
 public class JsonMessageProcessor implements MessageProcessor {
     private final JsonEventStore jsonEventStore;

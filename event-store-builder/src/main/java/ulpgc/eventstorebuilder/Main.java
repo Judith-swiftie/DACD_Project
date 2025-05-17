@@ -1,14 +1,14 @@
 package ulpgc.eventstorebuilder;
 
-import ulpgc.eventstorebuilder.control.Controller;
-import ulpgc.eventstorebuilder.control.JsonMessageProcessor;
-import ulpgc.eventstorebuilder.port.FileWriter;
-import ulpgc.eventstorebuilder.port.JsonEventPathBuilder;
-import ulpgc.eventstorebuilder.port.JsonEventStore;
-import ulpgc.eventstorebuilder.port.MessageProcessor;
-import ulpgc.eventstorebuilder.store.DefaultFileWriter;
-import ulpgc.eventstorebuilder.store.DefaultJsonEventPathBuilder;
-import ulpgc.eventstorebuilder.store.FileJsonEventStore;
+import ulpgc.eventstorebuilder.control.adapter.service.Controller;
+import ulpgc.eventstorebuilder.control.adapter.service.JsonMessageProcessor;
+import ulpgc.eventstorebuilder.control.port.FileWriter;
+import ulpgc.eventstorebuilder.control.port.JsonEventPathBuilder;
+import ulpgc.eventstorebuilder.control.port.JsonEventStore;
+import ulpgc.eventstorebuilder.control.port.MessageProcessor;
+import ulpgc.eventstorebuilder.control.adapter.store.DefaultFileWriter;
+import ulpgc.eventstorebuilder.control.adapter.store.DefaultJsonEventPathBuilder;
+import ulpgc.eventstorebuilder.control.adapter.store.FileJsonEventStore;
 
 public class Main {
     public static void main(String[] args) {

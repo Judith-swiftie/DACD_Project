@@ -1,4 +1,4 @@
-package ulpgc.eventstorebuilder.port;
+package ulpgc.eventstorebuilder.control.port;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -1,6 +1,6 @@
-package ulpgc.eventstorebuilder.store;
+package ulpgc.eventstorebuilder.control.adapter.store;
 
-import ulpgc.eventstorebuilder.port.FileWriter;
+import ulpgc.eventstorebuilder.control.port.FileWriter;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
