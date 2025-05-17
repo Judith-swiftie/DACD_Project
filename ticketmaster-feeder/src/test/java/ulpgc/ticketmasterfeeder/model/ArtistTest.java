@@ -1,15 +1,13 @@
 package ulpgc.ticketmasterfeeder.model;
 
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-class ArtistTest {
+public class ArtistTest {
 
     @Test
-    void testArtistName() {
-        Artist artist = new Artist("Banda X");
-
-        assertEquals("Banda X", artist.getName());
+    void testGetName() {
+        Artist artist = new Artist("The Beatles");
+        assertEquals("The Beatles", artist.getName());
     }
 }
