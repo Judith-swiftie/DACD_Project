@@ -1,20 +1,32 @@
 package ulpgc.spotifyfeeder.model;
 
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PlaylistTest {
+class PlaylistTest {
 
     @Test
-    public void testPlaylistAttributes() {
-        Track track = new Track("1", "Shallow", new Artist("123", "Lady Gaga"));
-        Playlist playlist = new Playlist("My Playlist", List.of(track));
-
+    void testPlaylistCreationAndGetters() {
+        Artist artist = new Artist("artist1", "Artist Name");
+        Track track1 = new Track("1", "Song 1", artist);
+        Track track2 = new Track("2", "Song 2", artist);
+        Playlist playlist = new Playlist("My Playlist", List.of(track1, track2));
         assertEquals("My Playlist", playlist.getName());
-        assertEquals(1, playlist.getTracks().size());
-        assertEquals("Shallow", playlist.getTracks().get(0).getName());
+        assertNotNull(playlist.getTracks());
+        assertEquals(2, playlist.getTracks().size());
+        assertTrue(playlist.getTracks().contains(track1));
+        assertTrue(playlist.getTracks().contains(track2));
+    }
+
+    @Test
+    void testToStringContainsNameAndTracks() {
+        Artist artist = new Artist("artist1", "Artist Name");
+        Track track = new Track("1", "Song 1", artist);
+        Playlist playlist = new Playlist("Playlist Test", List.of(track));
+        String str = playlist.toString();
+        assertTrue(str.contains("Playlist Test"));
+        assertTrue(str.contains("Song 1"));
+        assertTrue(str.contains("Artist Name"));
     }
 }
