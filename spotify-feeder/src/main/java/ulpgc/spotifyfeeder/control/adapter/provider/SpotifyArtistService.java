@@ -4,7 +4,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import ulpgc.spotifyfeeder.control.port.ArtistFinder;
 import ulpgc.spotifyfeeder.control.port.TrackProvider;
-
 import java.util.ArrayList;
 import java.util.List;
 

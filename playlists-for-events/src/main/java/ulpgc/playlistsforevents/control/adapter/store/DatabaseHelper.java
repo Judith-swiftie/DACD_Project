@@ -1,7 +1,6 @@
 package ulpgc.playlistsforevents.control.adapter.store;
 
 import ulpgc.playlistsforevents.control.port.ConnectionProvider;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 

@@ -10,16 +10,7 @@ public class PlaylistPresenter {
     }
 
     public void showArtistProcessing(String artistName) {
-
         System.out.println("Artista: " + artistName);
-    }
-
-    public void showTrack(String title) {
-        System.out.println("  Canción: " + title);
-    }
-
-    public void showNoTracks() {
-        System.out.println("  No hay canciones disponibles para este artista.");
     }
 
     public void displayPlaylist(Playlist playlist) {

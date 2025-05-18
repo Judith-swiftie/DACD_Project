@@ -26,7 +26,6 @@ public class Datamart implements TrackProvider{
                 json TEXT NOT NULL
             );
         """;
-
         String createArtistsTracksTable = """
             CREATE TABLE IF NOT EXISTS artists_tracks (
                 artist_name TEXT NOT NULL,
@@ -34,7 +33,6 @@ public class Datamart implements TrackProvider{
                 PRIMARY KEY (artist_name, track_name)
             );
         """;
-
         try (Connection conn = dbHelper.getConnection();
              Statement stmt = conn.createStatement()) {
             stmt.execute(createEventsTable);

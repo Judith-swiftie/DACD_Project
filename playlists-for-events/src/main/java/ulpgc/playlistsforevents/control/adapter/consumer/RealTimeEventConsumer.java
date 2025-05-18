@@ -1,7 +1,6 @@
 package ulpgc.playlistsforevents.control.adapter.consumer;
 
 import ulpgc.playlistsforevents.control.port.EventProcessor;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;

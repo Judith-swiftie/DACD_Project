@@ -21,7 +21,6 @@ public class SpotifyAuth {
     private static HttpRequest buildAuthRequest() {
         String credentials = CLIENT_ID + ":" + CLIENT_SECRET;
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
-
         return HttpRequest.newBuilder()
                 .uri(URI.create(TOKEN_URL))
                 .header("Authorization", "Basic " + encodedCredentials)
@@ -33,11 +32,9 @@ public class SpotifyAuth {
     private static HttpResponse<String> sendRequest(HttpRequest request) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
         if (response.statusCode() != 200) {
             throw new Exception("Error al obtener el token: " + response.body());
         }
-
         return response;
     }
 

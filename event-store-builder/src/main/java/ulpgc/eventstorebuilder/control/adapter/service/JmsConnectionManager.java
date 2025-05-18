@@ -8,6 +8,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 public class JmsConnectionManager {
     private static final String BROKER_URL = "tcp://localhost:61616";
     private final ConnectionFactory factory;
+
     public JmsConnectionManager() {
         this.factory = new ActiveMQConnectionFactory(BROKER_URL);
     }

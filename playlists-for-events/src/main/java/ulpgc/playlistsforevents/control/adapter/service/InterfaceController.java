@@ -57,20 +57,16 @@ public class InterfaceController {
             System.out.println("No se encontraron eventos.");
             return;
         }
-
         System.out.println("Eventos encontrados:");
         for (int i = 0; i < events.size(); i++) {
             System.out.println((i + 1) + ". " + events.get(i).getName());
         }
-
         System.out.print("Selecciona el número del evento para generar la playlist (o 0 para cancelar): ");
         int selection = readIntInput();
-
         if (selection < 1 || selection > events.size()) {
             System.out.println("Selección cancelada o inválida.");
             return;
         }
-
         Event selectedEvent = events.get(selection - 1);
         controller.generatePlaylistForEvent(selectedEvent);
     }

@@ -32,19 +32,16 @@ public class Controller {
                 System.out.println("No se encontró el artista: " + artistName);
                 return;
             }
-
             List<String> tracks = trackProvider.getTopTracksByCountry(artist.getString("id"), "ES");
             if (tracks.isEmpty()) {
                 System.out.println("No se encontraron canciones populares para el artista: " + artistName);
                 return;
             }
-
             if (musicStore.hasTracksChanged(artist.getString("id"), tracks)) {
                 musicStore.store(artist.getString("id"), artist.getString("name"), tracks);
             } else {
                 System.out.println("No hay cambios en las canciones para: " + artistName);
             }
-
         } catch (Exception e) {
             System.err.println("--- Error procesando artista '" + artistName + "': " + e.getMessage());
             e.printStackTrace();

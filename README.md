@@ -1,5 +1,6 @@
 ## Breve descripción del proyecto y su propuesta de valor.
 Este proyecto recoge datos de conciertos y festivales musicales a través de la API de Ticketmaster y, utilizando la API de Spotify, genera playlists personalizadas para cada uno de estos eventos.
+
 La motivación principal es la importancia de la música en la vida cotidiana y la relevancia cultural que tienen los conciertos y festivales en vivo. El objetivo es ofrecer una herramienta que conecte directamente los eventos musicales con su experiencia sonora previa, ayudando al usuario a descubrir artistas y prepararse para el evento de una forma más inmersiva y personalizada.
 
 ## Justificación de la elección de APIs y estructura del datamart.
@@ -212,7 +213,22 @@ Se ha seguido una arquitectura hexagonal, donde:
 - playlists-for-events es un adaptador de transformación, que genera una nueva funcionalidad a partir de datos históricos y en tiempo real.
 
 #### Diagramas
+![Esquema_Arquitectura](diagrams/Esquema_Arquitectura.png)
 
+Los paquetes están organizados en todos los modulos basándose en este esquema:
+![Esquema_Paquetes](diagrams/packages.png)
+
+Diagrama de clases del módulo spotify-feeder:
+![spotify-feeder](diagrams/spotify-feeder.png)
+
+Diagrama de clases del módulo ticketmaster-feeder:
+![ticketmaster-feeder](diagrams/ticketmaster-feeder.png)
+
+Diagrama de clases del módulo event-store-builder:
+![event-store-builder](diagrams/event-store-builder.png)
+
+Diagrama de clases del módulo playlists-for-events:
+![playlists-for-events](diagrams/playlists-for-events.png)
 
 ## Principios y patrones de diseño aplicados en cada módulo. 
 
