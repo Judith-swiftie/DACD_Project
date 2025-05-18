@@ -28,14 +28,10 @@ public class PlaylistGenerator {
         List<Track> tracks = new ArrayList<>();
         for (Artist artist : event.getArtists()) {
             String artistName = artist.getName();
-            presenter.showArtistProcessing(artistName);
             List<String> artistTracks = trackProvider.getTracksByArtist(artistName);
-            if (artistTracks.isEmpty()) {
-                presenter.showNoTracks();
-            } else {
+            if (!artistTracks.isEmpty()) {
                 for (String title : artistTracks) {
                     tracks.add(new Track(title));
-                    presenter.showTrack(title);
                 }
             }
         }

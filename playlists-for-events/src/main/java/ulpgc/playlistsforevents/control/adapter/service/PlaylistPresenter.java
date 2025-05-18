@@ -10,6 +10,7 @@ public class PlaylistPresenter {
     }
 
     public void showArtistProcessing(String artistName) {
+
         System.out.println("Artista: " + artistName);
     }
 

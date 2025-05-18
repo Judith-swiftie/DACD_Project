@@ -2,17 +2,15 @@ package ulpgc.playlistsforevents.control.adapter.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import ulpgc.playlistsforevents.control.port.TrackProvider;
 import ulpgc.playlistsforevents.model.Artist;
 import ulpgc.playlistsforevents.model.Event;
-import ulpgc.playlistsforevents.model.Playlist;
-import ulpgc.playlistsforevents.model.Track;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 class PlaylistGeneratorTest {
     private TrackProvider trackProvider;
@@ -27,43 +25,32 @@ class PlaylistGeneratorTest {
     }
 
     @Test
-    void generatePlaylistForEvent_withTracksFromArtists() {
-        Artist artist1 = new Artist("Coldplay");
-        Artist artist2 = new Artist("Adele");
-        Event event = new Event("Concierto Estelar", Arrays.asList(artist1, artist2));
-        when(trackProvider.getTracksByArtist("Coldplay")).thenReturn(List.of("Yellow", "Fix You"));
-        when(trackProvider.getTracksByArtist("Adele")).thenReturn(List.of("Hello"));
+    void generatePlaylistForEvent_generatesPlaylistWithTracks() {
+        Artist artist = new Artist("Coldplay");
+        Event event = new Event("Concierto Rock", List.of(artist));
+        when(trackProvider.getTracksByArtist("Coldplay"))
+                .thenReturn(Arrays.asList("Yellow", "Fix You"));
         generator.generatePlaylistForEvent(event);
-        verify(presenter).showGeneratingMessage("Concierto Estelar");
-        verify(presenter).showArtistProcessing("Coldplay");
-        verify(presenter).showTrack("Yellow");
-        verify(presenter).showTrack("Fix You");
-        verify(presenter).showArtistProcessing("Adele");
-        verify(presenter).showTrack("Hello");
-        ArgumentCaptor<Playlist> playlistCaptor = ArgumentCaptor.forClass(Playlist.class);
-        verify(presenter).displayPlaylist(playlistCaptor.capture());
-        Playlist playlist = playlistCaptor.getValue();
-        assertEquals("Mi Playlist para el Evento: Concierto Estelar", playlist.getName());
-        List<Track> tracks = playlist.getTracks();
-        assertEquals(3, tracks.size());
-        assertEquals("Yellow", tracks.get(0).getTitle());
-        assertEquals("Fix You", tracks.get(1).getTitle());
-        assertEquals("Hello", tracks.get(2).getTitle());
+        verify(presenter).showGeneratingMessage("Concierto Rock");
+        verify(presenter).displayPlaylist(argThat(playlist ->
+                playlist.getName().equals("Mi Playlist para el Evento: Concierto Rock") &&
+                        playlist.getTracks().size() == 2 &&
+                        playlist.getTracks().get(0).getTitle().equals("Yellow") &&
+                        playlist.getTracks().get(1).getTitle().equals("Fix You")
+        ));
     }
 
     @Test
-    void generatePlaylistForEvent_withNoTracksForArtist() {
-        Artist artist = new Artist("Unknown Artist");
-        Event event = new Event("Evento Sin Canciones", List.of(artist));
-        when(trackProvider.getTracksByArtist("Unknown Artist")).thenReturn(Collections.emptyList());
+    void generatePlaylistForEvent_withArtistWithoutTracks_generatesEmptyPlaylist() {
+        Artist artist = new Artist("Artista Desconocido");
+        Event event = new Event("Evento Vacío", List.of(artist));
+        when(trackProvider.getTracksByArtist("Artista Desconocido"))
+                .thenReturn(Collections.emptyList());
         generator.generatePlaylistForEvent(event);
-        verify(presenter).showGeneratingMessage("Evento Sin Canciones");
-        verify(presenter).showArtistProcessing("Unknown Artist");
-        verify(presenter).showNoTracks();
-        ArgumentCaptor<Playlist> playlistCaptor = ArgumentCaptor.forClass(Playlist.class);
-        verify(presenter).displayPlaylist(playlistCaptor.capture());
-        Playlist playlist = playlistCaptor.getValue();
-        assertEquals("Mi Playlist para el Evento: Evento Sin Canciones", playlist.getName());
-        assertTrue(playlist.getTracks().isEmpty());
+        verify(presenter).showGeneratingMessage("Evento Vacío");
+        verify(presenter).displayPlaylist(argThat(playlist ->
+                playlist.getName().equals("Mi Playlist para el Evento: Evento Vacío") &&
+                        playlist.getTracks().isEmpty()
+        ));
     }
 }
